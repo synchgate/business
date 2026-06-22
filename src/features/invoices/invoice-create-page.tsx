@@ -133,7 +133,8 @@ export function InvoiceCreatePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {fields.map((field, index) => (
-              <div key={field.id} className="grid gap-3 rounded-[var(--radius-chip)] border border-[var(--color-line)] p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
+              // <div key={field.id} className="grid gap-3 rounded-[var(--radius-chip)] border border-[var(--color-line)] p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
+              <div key={field.id} className="grid gap-3 rounded-[var(--radius-chip)] border border-[var(--color-line)] p-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto]">
                 <div className="space-y-1.5">
                   <Label>Item</Label>
                   <Input placeholder="Web design services" {...register(`items.${index}.item_name`)} />
@@ -141,13 +142,20 @@ export function InvoiceCreatePage() {
                     <p className="text-xs text-[var(--color-status-overdue)]">{errors.items[index]?.item_name?.message}</p>
                   )}
                 </div>
-                {/* <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-2">
                   <Label>Description</Label>
-                  <Input placeholder="Item description" {...register(`items.${index}.description`)} />
+                  <Textarea
+                    placeholder="Item description"
+                    rows={4}
+                    className="resize-y min-h-[100px]"
+                    {...register(`items.${index}.description`)}
+                  />
                   {errors.items?.[index]?.description && (
-                    <p className="text-xs text-[var(--color-status-overdue)]">{errors.items[index]?.description?.message}</p>
+                    <p className="text-xs text-[var(--color-status-overdue)]">
+                      {errors.items[index]?.description?.message}
+                    </p>
                   )}
-                </div> */}
+                </div>
                 <div className="space-y-1.5">
                   <Label>Quantity</Label>
                   <Input type="number" step="0.01" min="0.01" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
