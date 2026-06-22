@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@import "@fontsource/sora/500.css";
+@import "@fontsource/sora/600.css";
+@import "@fontsource/sora/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Synchgate Invoicing — design tokens.
+
+  Canvas is the brief's brand color (#F0F5FA, 210° 50% 96%) used as the app
+  background; everything else is derived from the same blue-grey hue family
+  so cards, text, and borders read as one family rather than a bolted-on
+  generic UI kit. Status color is the one place we spend visual emphasis:
+  every invoice state has a single, consistent color used as a left-rail
+  accent in tables/cards and nowhere else, so color stays informational.
+*/
+@theme {
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-ledger: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-canvas: #f0f5fa;
+  --color-surface: #ffffff;
+  --color-surface-muted: #e7eef6;
+  --color-ink: #101728;
+  --color-body: #4b5366;
+  --color-muted: #8a93a6;
+  --color-line: #dce3ed;
+
+  --color-primary: #1849d6;
+  --color-primary-hover: #123baf;
+  --color-primary-soft: #e3ecfc;
+
+  --color-status-draft: #8a93a6;
+  --color-status-sent: #1849d6;
+  --color-status-viewed: #6d5bd0;
+  --color-status-partially_paid: #c8801a;
+  --color-status-paid: #138a5e;
+  --color-status-overdue: #d6334c;
+  --color-status-cancelled: #6b7280;
+
+  --radius-card: 0.625rem;
+  --radius-chip: 0.375rem;
+}
+
+.dark {
+  --color-canvas: #0b0f19;
+  --color-surface: #11162a;
+  --color-surface-muted: #161d33;
+  --color-ink: #f3f5f9;
+  --color-body: #aeb6c6;
+  --color-muted: #6b7387;
+  --color-line: #232b3d;
+
+  --color-primary: #5b8df0;
+  --color-primary-hover: #7fa4f3;
+  --color-primary-soft: #1a2742;
+
+  --color-status-draft: #8a93a6;
+  --color-status-sent: #5b8df0;
+  --color-status-viewed: #9b8df0;
+  --color-status-partially_paid: #e0a23f;
+  --color-status-paid: #2fbf86;
+  --color-status-overdue: #ef5a72;
+  --color-status-cancelled: #8a93a6;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background-color: var(--color-primary-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .font-ledger {
+    font-family: var(--font-ledger);
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice-printable, #invoice-printable * {
+    visibility: visible;
+  }
+  #invoice-printable {
+    position: absolute;
+    inset: 0;
+    border: none;
+  }
+}
