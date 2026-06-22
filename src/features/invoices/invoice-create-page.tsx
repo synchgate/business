@@ -141,6 +141,13 @@ export function InvoiceCreatePage() {
                     <p className="text-xs text-[var(--color-status-overdue)]">{errors.items[index]?.item_name?.message}</p>
                   )}
                 </div>
+                {/* <div className="space-y-1.5">
+                  <Label>Description</Label>
+                  <Input placeholder="Item description" {...register(`items.${index}.description`)} />
+                  {errors.items?.[index]?.description && (
+                    <p className="text-xs text-[var(--color-status-overdue)]">{errors.items[index]?.description?.message}</p>
+                  )}
+                </div> */}
                 <div className="space-y-1.5">
                   <Label>Quantity</Label>
                   <Input type="number" step="0.01" min="0.01" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
