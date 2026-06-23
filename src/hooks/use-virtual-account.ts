@@ -9,9 +9,22 @@ export function useVirtualAccount() {
       try {
         return await getVirtualAccount();
       } catch (err) {
-        if (isAxiosError(err) && err.response?.status === 404) {
-          return null;
+        if (isAxiosError(err)) {
+          const response = err.response?.data as {
+            status?: string;
+            message?: string;
+            errors?: number;
+          };
+
+          if (
+            err.response?.status === 404 ||
+            response?.errors === 404 ||
+            response?.message === "No virtual account configured."
+          ) {
+            return null;
+          }
         }
+
         throw err;
       }
     },
@@ -29,10 +42,13 @@ export function useVirtualAccount() {
 
 export function useCreateVirtualAccount() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createVirtualAccount,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["merchant", "virtualAccount"] });
+      queryClient.invalidateQueries({
+        queryKey: ["merchant", "virtualAccount"],
+      });
     },
   });
 }

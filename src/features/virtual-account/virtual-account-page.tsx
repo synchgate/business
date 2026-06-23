@@ -225,12 +225,12 @@ export function VirtualAccountPage() {
                 {createAccount.isPending ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Creating your account…
+                    Requesting your account…
                   </>
                 ) : (
                   <>
                     <Building2 className="size-4" />
-                    Create virtual account
+                    Request virtual account
                   </>
                 )}
               </Button>
