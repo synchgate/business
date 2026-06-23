@@ -4,8 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { RequireAuth, RequireGuest, RequireOnboarded } from "@/routes/guards";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// All feature pages are lazy-loaded so each route chunk only loads on demand,
-// keeping the initial bundle small despite the breadth of the app.
+const LandingPage = lazy(() => import("@/features/landing/landing-page").then((m) => ({ default: m.LandingPage })));
 const LoginPage = lazy(() => import("@/features/auth/login-page").then((m) => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import("@/features/auth/register-page").then((m) => ({ default: m.RegisterPage })));
 const VerifyEmailPage = lazy(() => import("@/features/auth/verify-email-page").then((m) => ({ default: m.VerifyEmailPage })));
@@ -18,6 +17,8 @@ const InvoiceCreatePage = lazy(() => import("@/features/invoices/invoice-create-
 const InvoiceDetailPage = lazy(() => import("@/features/invoices/invoice-detail-page").then((m) => ({ default: m.InvoiceDetailPage })));
 const InvoiceEditPage = lazy(() => import("@/features/invoices/invoice-edit-page").then((m) => ({ default: m.InvoiceEditPage })));
 const CustomerListPage = lazy(() => import("@/features/customers/customer-list-page").then((m) => ({ default: m.CustomerListPage })));
+const CustomerDetailPage = lazy(() => import("@/features/customers/customer-detail-page").then((m) => ({ default: m.CustomerDetailPage })));
+const VirtualAccountPage = lazy(() => import("@/features/virtual-account/virtual-account-page").then((m) => ({ default: m.VirtualAccountPage })));
 const SettingsPage = lazy(() => import("@/features/settings/settings-page").then((m) => ({ default: m.SettingsPage })));
 const PublicInvoicePage = lazy(() => import("@/features/public/public-invoice-page").then((m) => ({ default: m.PublicInvoicePage })));
 const NotFoundPage = lazy(() => import("@/features/not-found-page").then((m) => ({ default: m.NotFoundPage })));
@@ -38,9 +39,13 @@ function wrap(element: React.ReactNode) {
 }
 
 export const router = createBrowserRouter([
-  // Public, unauthenticated — mirrors invoicing/urls.py pay/<invoice_number>/
+  // ── Public marketing home ──────────────────────────────────────
+  { path: "/", element: wrap(<LandingPage />) },
+
+  // ── Public invoice pay page (no auth) ─────────────────────────
   { path: "/pay/:invoiceNumber", element: wrap(<PublicInvoicePage />) },
 
+  // ── Guest-only auth pages ─────────────────────────────────────
   {
     element: <RequireGuest />,
     children: [
@@ -52,6 +57,7 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // ── Authenticated routes ───────────────────────────────────────
   {
     element: <RequireAuth />,
     children: [
@@ -63,12 +69,25 @@ export const router = createBrowserRouter([
             element: <AppShell />,
             children: [
               { path: "/dashboard", element: wrap(<DashboardPage />), handle: { title: "Dashboard" } },
+
+              // Invoices
               { path: "/invoices", element: wrap(<InvoiceListPage />), handle: { title: "Invoices" } },
               { path: "/invoices/new", element: wrap(<InvoiceCreatePage />), handle: { title: "New invoice" } },
               { path: "/invoices/:id", element: wrap(<InvoiceDetailPage />), handle: { title: "Invoice" } },
               { path: "/invoices/:id/edit", element: wrap(<InvoiceEditPage />), handle: { title: "Edit invoice" } },
+
+              // Virtual account
+              { path: "/virtual-account", element: wrap(<VirtualAccountPage />), handle: { title: "Virtual Account" } },
+
+              // Customers
               { path: "/customers", element: wrap(<CustomerListPage />), handle: { title: "Customers" } },
+              { path: "/customers/:id", element: wrap(<CustomerDetailPage />), handle: { title: "Customer" } },
+
+              // Settings
               { path: "/settings", element: wrap(<SettingsPage />), handle: { title: "Settings" } },
+
+              // Redirect /app → /dashboard
+              { path: "/app", element: <Navigate to="/dashboard" replace /> },
             ],
           },
         ],
@@ -76,6 +95,5 @@ export const router = createBrowserRouter([
     ],
   },
 
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
   { path: "*", element: wrap(<NotFoundPage />) },
 ]);

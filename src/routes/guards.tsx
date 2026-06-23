@@ -40,6 +40,8 @@ export function RequireOnboarded() {
   return <Outlet />;
 }
 
+// Guest pages (login, register) redirect to dashboard if already signed in.
+// The landing page (/) is always public — don't use RequireGuest there.
 export function RequireGuest() {
   const { isAuthenticated } = useAuth();
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;

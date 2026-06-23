@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, Wallet, Clock, AlertTriangle, Plus } from "lucide-react";
+import { FileText, Wallet, Clock, AlertTriangle, Plus, Building2, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -9,11 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/ui/state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoiceAnalytics, useInvoiceList } from "@/hooks/use-invoices";
+import { useVirtualAccount } from "@/hooks/use-virtual-account";
 import { formatDate, formatMoney } from "@/lib/format";
 
 export function DashboardPage() {
   const { data: analytics, isLoading: analyticsLoading } = useInvoiceAnalytics();
   const { data: recent, isLoading: recentLoading } = useInvoiceList({});
+  const { virtualAccount, isLoading: vaLoading } = useVirtualAccount();
 
   const recentInvoices = recent?.results?.slice(0, 5) ?? [];
 
@@ -60,6 +62,35 @@ export function DashboardPage() {
           isLoading={analyticsLoading}
         />
       </div>
+
+      {/* Virtual account quick-status */}
+      <Card className="border-l-4" style={{ borderLeftColor: "var(--color-primary)" }}>
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-full bg-[var(--color-primary-soft)]">
+              <Building2 className="size-5 text-[var(--color-primary)]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-ink)]">Virtual Account</p>
+              {vaLoading ? (
+                <Skeleton className="mt-1 h-4 w-36" />
+              ) : virtualAccount ? (
+                <p className="font-ledger text-sm text-[var(--color-body)]">
+                  {virtualAccount.dedicated_account_number} · {virtualAccount.bank_name}
+                </p>
+              ) : (
+                <p className="text-sm text-[var(--color-muted)]">Not set up yet — get a dedicated account number</p>
+              )}
+            </div>
+          </div>
+          <Button size="sm" variant={virtualAccount ? "secondary" : "primary"} asChild>
+            <Link to="/virtual-account">
+              {virtualAccount ? "View account" : "Set up now"}
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
