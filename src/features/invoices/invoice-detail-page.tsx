@@ -10,6 +10,7 @@ import {
   Send,
   Trash2,
   ChevronLeft,
+  Share2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
 import { Logo } from "@/components/logo";
+// import PublicInvoicePage from "@/pages/public-invoice-page";
 
 function isNotImplemented(err: unknown) {
   return isAxiosError(err) && (err.response?.status === 404 || err.response?.status === 405);
@@ -68,6 +70,7 @@ export function InvoiceDetailPage() {
   const canSend = invoice.status === "draft" || invoice.status === "sent";
   const canCancel = !["paid", "cancelled"].includes(invoice.status);
   const canRemind = ["sent", "viewed", "partially_paid", "overdue"].includes(invoice.status);
+  const publicInvoiceUrl = `${window.location.origin}/pay/${invoice.invoice_number}`;
 
   const handleSend = async () => {
     try {
@@ -120,6 +123,15 @@ export function InvoiceDetailPage() {
     toast.success("Payment link copied.");
   };
 
+  const handleCopyInvoiceUrl = async () => {
+  try {
+    await navigator.clipboard.writeText(publicInvoiceUrl);
+    toast.success("Invoice URL copied.");
+  } catch {
+    toast.error("Failed to copy invoice URL.");
+  }
+};
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -140,6 +152,17 @@ export function InvoiceDetailPage() {
               Remind
             </Button>
           )}
+
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleCopyInvoiceUrl}
+          >
+            <Share2 className="size-4" />
+            Share Invoice
+          </Button>
+
+          
           <Button size="sm" variant="secondary" onClick={() => window.print()}>
             <Printer className="size-4" />
             Print / PDF
