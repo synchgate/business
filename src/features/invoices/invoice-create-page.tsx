@@ -3,22 +3,17 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, Trash2, User, ChevronDown, Loader2 } from "lucide-react";
+import { Plus, Trash2, User, ChevronDown, Loader2, ChevronLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useCreateInvoice } from "@/hooks/use-invoices";
-import { useAllCustomers } from "@/hooks/use-customers";
-import { useCustomer } from "@/hooks/use-customers";
+import { useAllCustomers, useCustomer } from "@/hooks/use-customers";
 import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/format";
@@ -82,15 +77,17 @@ function CustomerPicker({
           open && "border-[var(--color-primary)]",
         )}
       >
-        <span className="flex items-center gap-2 text-[var(--color-ink)]">
-          <User className="size-3.5 text-[var(--color-muted)]" />
-          {isLoading
-            ? "Loading customers…"
-            : selected
-            ? `${selected.name} · ${selected.email}`
-            : "Select existing customer (optional)"}
+        <span className="flex min-w-0 items-center gap-2 text-[var(--color-ink)]">
+          <User className="size-3.5 shrink-0 text-[var(--color-muted)]" />
+          <span className="truncate">
+            {isLoading
+              ? "Loading customers…"
+              : selected
+              ? `${selected.name} · ${selected.email}`
+              : "Select existing customer (optional)"}
+          </span>
         </span>
-        <ChevronDown className="size-4 text-[var(--color-muted)]" />
+        <ChevronDown className="size-4 shrink-0 text-[var(--color-muted)]" />
       </button>
 
       {open && (
@@ -118,22 +115,15 @@ function CustomerPicker({
                   key={c.id}
                   className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-[var(--color-surface-muted)]"
                   onClick={() => {
-                    onSelect({
-                      id: c.id,
-                      name: c.business_name ?? c.name,
-                      email: c.email,
-                      phone: c.phone ?? undefined,
-                    });
+                    onSelect({ id: c.id, name: c.business_name ?? c.name, email: c.email, phone: c.phone ?? undefined });
                     setOpen(false);
                     setSearch("");
                   }}
                 >
                   <User className="mt-0.5 size-3.5 shrink-0 text-[var(--color-muted)]" />
-                  <span>
-                    <span className="font-medium text-[var(--color-ink)]">
-                      {c.business_name ?? c.name}
-                    </span>
-                    <span className="ml-1.5 text-xs text-[var(--color-muted)]">{c.email}</span>
+                  <span className="min-w-0">
+                    <span className="font-medium text-[var(--color-ink)]">{c.business_name ?? c.name}</span>
+                    <span className="ml-1.5 text-xs text-[var(--color-muted)] truncate">{c.email}</span>
                   </span>
                 </button>
               ))
@@ -144,10 +134,7 @@ function CustomerPicker({
               <button
                 type="button"
                 className="w-full rounded-[var(--radius-chip)] py-1.5 text-xs text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)]"
-                onClick={() => {
-                  onSelect({ id: "", name: "", email: "", phone: "" });
-                  setOpen(false);
-                }}
+                onClick={() => { onSelect({ id: "", name: "", email: "", phone: "" }); setOpen(false); }}
               >
                 Clear selection
               </button>
@@ -164,21 +151,13 @@ export function InvoiceCreatePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preselectedCustomerId = searchParams.get("customer");
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
-    preselectedCustomerId,
-  );
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(preselectedCustomerId);
 
   const createInvoice = useCreateInvoice();
-
-  // Pre-load the selected customer from query param (e.g. from Customers page "Invoice" button)
   const { data: preloadedCustomer } = useCustomer(preselectedCustomerId ?? undefined);
 
   const {
-    register,
-    control,
-    handleSubmit,
-    watch,
-    setValue,
+    register, control, handleSubmit, watch, setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -190,7 +169,6 @@ export function InvoiceCreatePage() {
     },
   });
 
-  // Populate form when preloaded customer arrives
   useEffect(() => {
     if (preloadedCustomer) {
       setValue("customer_name", preloadedCustomer.business_name ?? preloadedCustomer.name);
@@ -206,21 +184,12 @@ export function InvoiceCreatePage() {
   const currency = watch("currency");
 
   const subtotal = useMemo(
-    () =>
-      (items ?? []).reduce(
-        (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0),
-        0,
-      ),
+    () => (items ?? []).reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0), 0),
     [items],
   );
   const total = subtotal - Number(discount) + Number(tax);
 
-  const handleCustomerSelect = (c: {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-  }) => {
+  const handleCustomerSelect = (c: { id: string; name: string; email: string; phone?: string }) => {
     setSelectedCustomerId(c.id || null);
     if (c.name) setValue("customer_name", c.name);
     if (c.email) setValue("customer_email", c.email);
@@ -238,40 +207,35 @@ export function InvoiceCreatePage() {
       toast.success("Invoice created.");
       navigate(`/invoices/${invoice.id}`);
     } catch (err) {
-      toast.error(
-        readErrorMessage(
-          (err as { response?: { data?: unknown } }).response?.data,
-          "Couldn't create the invoice.",
-        ),
-      );
+      toast.error(readErrorMessage((err as { response?: { data?: unknown } }).response?.data, "Couldn't create the invoice."));
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">New invoice</h2>
-        <p className="text-sm text-[var(--color-body)]">Saves as a draft until you send it.</p>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+          <ChevronLeft className="size-4" />
+        </Button>
+        <div>
+          <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">New invoice</h2>
+          <p className="text-sm text-[var(--color-body)]">Saves as a draft until you send it.</p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
         {/* Customer */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Customer</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <Label>Select from directory (optional)</Label>
-              <CustomerPicker
-                selectedId={selectedCustomerId}
-                onSelect={handleCustomerSelect}
-              />
+              <CustomerPicker selectedId={selectedCustomerId} onSelect={handleCustomerSelect} />
               <p className="text-xs text-[var(--color-muted)]">
                 Selecting a customer fills in their details automatically.{" "}
-                <a href="/customers" className="text-[var(--color-primary)] hover:underline">
-                  Manage customers →
-                </a>
+                <a href="/customers" className="text-[var(--color-primary)] hover:underline">Manage customers →</a>
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -306,63 +270,59 @@ export function InvoiceCreatePage() {
 
         {/* Items */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Line items</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {fields.map((field, index) => (
-              <div key={field.id} className="grid gap-3 rounded-[var(--radius-chip)] border border-[var(--color-line)] p-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto]">
-                <div className="space-y-1.5">
+              <div
+                key={field.id}
+                className="relative space-y-3 rounded-[var(--radius-chip)] border border-[var(--color-line)] p-3 sm:grid sm:grid-cols-[2fr_1fr_1fr_auto] sm:gap-3 sm:space-y-0"
+              >
+                {/* Item name */}
+                <div className="space-y-1.5 sm:col-span-4 sm:col-start-1">
                   <Label>Item</Label>
                   <Input placeholder="Web design services" {...register(`items.${index}.item_name`)} />
                   {errors.items?.[index]?.item_name && (
-                    <p className="text-xs text-[var(--color-status-overdue)]">
-                      {errors.items[index]?.item_name?.message}
-                    </p>
+                    <p className="text-xs text-[var(--color-status-overdue)]">{errors.items[index]?.item_name?.message}</p>
                   )}
                 </div>
-                <div className="space-y-1.5 sm:col-span-2">
+                {/* Description */}
+                <div className="space-y-1.5 sm:col-span-4">
                   <Label>Description</Label>
                   <Textarea
                     placeholder="Item description"
-                    rows={4}
-                    className="resize-y min-h-[100px]"
+                    rows={2}
+                    className="resize-y"
                     {...register(`items.${index}.description`)}
                   />
-                  {errors.items?.[index]?.description && (
-                    <p className="text-xs text-[var(--color-status-overdue)]">
-                      {errors.items[index]?.description?.message}
-                    </p>
-                  )}
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Qty</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Unit price</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => remove(index)}
-                    disabled={fields.length === 1}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                {/* Qty + price + delete */}
+                <div className="flex gap-3 sm:contents">
+                  <div className="flex-1 space-y-1.5 sm:flex-none">
+                    <Label>Qty</Label>
+                    <Input
+                      type="number" step="0.01" min="0.01"
+                      {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1.5 sm:flex-none">
+                    <Label>Unit price</Label>
+                    <Input
+                      type="number" step="0.01" min="0.01"
+                      {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
+                    />
+                  </div>
+                  <div className="flex items-end sm:flex-none">
+                    <Button
+                      type="button" variant="ghost" size="icon"
+                      onClick={() => remove(index)}
+                      disabled={fields.length === 1}
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -370,9 +330,7 @@ export function InvoiceCreatePage() {
               <p className="text-xs text-[var(--color-status-overdue)]">{errors.items.message}</p>
             )}
             <Button
-              type="button"
-              variant="secondary"
-              size="sm"
+              type="button" variant="secondary" size="sm"
               onClick={() => append({ item_name: "", description: "", quantity: 1, unit_price: 0 })}
             >
               <Plus className="size-4" />
@@ -383,16 +341,14 @@ export function InvoiceCreatePage() {
 
         {/* Totals & notes */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Totals & notes</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>Currency</Label>
               <Select value={currency} onValueChange={(v) => setValue("currency", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NGN">NGN — Naira</SelectItem>
                   <SelectItem value="USD">USD — Dollar</SelectItem>
@@ -404,23 +360,11 @@ export function InvoiceCreatePage() {
             <div />
             <div className="space-y-1.5">
               <Label htmlFor="discount">Discount</Label>
-              <Input
-                id="discount"
-                type="number"
-                step="0.01"
-                min="0"
-                {...register("discount", { valueAsNumber: true })}
-              />
+              <Input id="discount" type="number" step="0.01" min="0" {...register("discount", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="tax">Tax</Label>
-              <Input
-                id="tax"
-                type="number"
-                step="0.01"
-                min="0"
-                {...register("tax", { valueAsNumber: true })}
-              />
+              <Input id="tax" type="number" step="0.01" min="0" {...register("tax", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="notes">Notes (visible to customer)</Label>
@@ -453,16 +397,13 @@ export function InvoiceCreatePage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Saving…
-              </>
+              <><Loader2 className="size-4 animate-spin" />Saving…</>
             ) : (
               "Save invoice"
             )}

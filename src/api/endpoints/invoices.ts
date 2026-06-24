@@ -81,7 +81,6 @@ export async function getPublicInvoice(invoiceNumber: string) {
   return data.data;
 }
 
-
 // ── Not live on the backend yet (implementation plan, gap #1) ──────────────
 // These call the REST-conventional routes a PATCH/DELETE mixin would expose
 // on InvoiceViewSet. They're wired up end-to-end on the frontend now so the

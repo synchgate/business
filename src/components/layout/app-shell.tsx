@@ -10,9 +10,9 @@ export function AppShell() {
   return (
     <div className="flex min-h-screen bg-[var(--color-canvas)]">
       <Sidebar />
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen flex-1 flex-col min-w-0">
         <Topbar title={title} />
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-3 sm:p-4 md:p-6">
           <div className="mx-auto max-w-6xl">
             <Outlet />
           </div>
