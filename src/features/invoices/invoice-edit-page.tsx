@@ -153,9 +153,9 @@ export function InvoiceEditPage() {
           </h2>
           <p className="text-sm text-[var(--color-body)]">
             Changes apply immediately once saved.{" "}
-            <span className="rounded-[var(--radius-chip)] bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            {/* <span className="rounded-[var(--radius-chip)] bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
               Requires backend PATCH route — coming soon
-            </span>
+            </span> */}
           </p>
         </div>
       </div>
