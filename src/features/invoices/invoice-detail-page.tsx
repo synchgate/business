@@ -358,7 +358,7 @@ export function InvoiceDetailPage() {
 
           {/* Bank details — only visible on print */}
           {(virtualAccount || settlementAccount) && (
-            <div className="hidden print:block">
+            <div className="print-bank-details" style={{ display: "none" }}>
               <Separator />
               <div className="mt-4">
                 <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">

@@ -116,84 +116,44 @@
   }
 }
 
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #invoice-printable, #invoice-printable * {
-    visibility: visible;
-  }
-  #invoice-printable {
-    position: absolute;
-    inset: 0;
-    border: none;
-  }
-}
-
 /* ── Print styles ────────────────────────────────────────────────── */
 @media print {
-  /* Hide everything except the printable invoice */
-  body > * {
-    display: none !important;
-  }
-
-  /* Show only the app root so React can find #invoice-printable */
-  body > #root {
-    display: block !important;
-  }
-
-  /* Hide all shell chrome */
-  aside,
-  header,
-  [data-topbar],
-  .print\:hidden,
-  [class*="topbar"],
-  [class*="sidebar"] {
-    display: none !important;
-  }
-
-  /* Reset layout so the invoice fills the page */
-  #root,
-  .flex.min-h-screen,
-  .flex.min-h-screen > div,
-  main {
-    display: block !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: white !important;
-    min-height: unset !important;
-  }
-
-  /* Show the printable card full-width */
-  #invoice-printable {
-    display: block !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-
-  /* Hide action buttons, share banner, receipt card, dialogs */
-  .space-y-4 > :not(#invoice-printable),
-  .space-y-6 > :not(#invoice-printable) {
-    display: none !important;
-  }
-
-  /* Show the bank details section that is print-only */
-  .print\:block {
-    display: block !important;
-  }
-
-  /* Typography adjustments */
-  * {
-    color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
   @page {
     margin: 1.5cm;
     size: A4;
+  }
+
+  /* Step 1: hide everything */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Step 2: reveal only the invoice card and its children */
+  #invoice-printable,
+  #invoice-printable * {
+    visibility: visible !important;
+  }
+
+  /* Step 3: position the invoice at top-left of the page */
+  #invoice-printable {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  /* Step 4: show the bank-details section that is hidden on screen */
+  #invoice-printable .print-bank-details {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Step 5: accurate colours */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
