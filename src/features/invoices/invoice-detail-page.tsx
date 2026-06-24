@@ -253,8 +253,7 @@ export function InvoiceDetailPage() {
             <div>
               <Logo />
               <p className="mt-3 font-ledger text-base font-medium text-[var(--color-ink)] sm:text-lg">
-                {invoice.invoice_number.split("-").slice(0, 3).join("-")}
-                {/* {invoice.invoice_number} */}
+                {invoice.invoice_number}
               </p>
             </div>
             <div className="text-right">
