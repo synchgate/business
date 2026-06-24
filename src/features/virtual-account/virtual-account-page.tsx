@@ -168,14 +168,14 @@ export function VirtualAccountPage() {
                   <Copy className="size-4" />
                   Copy account number
                 </Button>
-                <Button
+                {/* <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => refetch()}
                 >
                   <RefreshCw className="size-4" />
                   Refresh
-                </Button>
+                </Button> */}
               </div>
             </CardContent>
           </Card>

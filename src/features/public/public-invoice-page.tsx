@@ -68,7 +68,8 @@ export function PublicInvoicePage() {
                 <div className="flex items-start justify-between gap-3 p-4 sm:p-6">
                   <div>
                     <p className="font-ledger text-base font-medium text-[var(--color-ink)] sm:text-lg">
-                      {invoice.invoice_number}
+                      {invoice.invoice_number.split("-").slice(0, 3).join("-")}
+                      {/* {invoice.invoice_number} */}
                     </p>
                     <p className="mt-0.5 text-sm text-[var(--color-body)]">
                       Due {formatDate(invoice.due_date)}
