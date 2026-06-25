@@ -94,13 +94,13 @@ export function SettlementSetupPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Select your bank" />
                 </SelectTrigger>
-                <SelectContent>
-                  {NIGERIAN_BANKS.map((bank) => (
-                    <SelectItem key={bank.code} value={bank.code}>
-                      {bank.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectContent className="max-h-64 overflow-y-auto">
+                {NIGERIAN_BANKS.map((bank) => (
+                  <SelectItem key={bank.code} value={bank.code}>
+                    {bank.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
               </Select>
               {errors.bank_code && <p className="text-xs text-[var(--color-status-overdue)]">{errors.bank_code.message}</p>}
             </div>
