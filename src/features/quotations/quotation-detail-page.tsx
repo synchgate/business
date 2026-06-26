@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   Ban, Bell, ChevronLeft, Copy, ExternalLink, FileText,
-  Link2, Loader2, Pencil, Send, Trash2, CheckCircle2,
+  Link2, Loader2, Pencil, Send, CheckCircle2,
   XCircle, Clock, ArrowRightCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +23,7 @@ import { formatDate, formatMoney, QUOTE_STATUS_LABEL } from "@/lib/format";
 import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
 import { Logo } from "@/components/logo";
-import { Separator as Sep } from "@/components/ui/separator";
+// import { Separator as Sep } from "@/components/ui/separator";
 
 const PUBLIC_BASE = `${window.location.origin}/quote`;
 
