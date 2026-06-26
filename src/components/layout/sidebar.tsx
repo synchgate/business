@@ -8,20 +8,22 @@ import {
   X,
   Wallet,
   Send,
+  ClipboardList,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/invoices", label: "Invoices", icon: FileText },
+  { to: "/dashboard",       label: "Dashboard",      icon: LayoutDashboard },
+  { to: "/invoices",        label: "Invoices",        icon: FileText },
+  { to: "/quotes",          label: "Quotations",      icon: ClipboardList },
   { to: "/virtual-account", label: "Virtual Account", icon: Building2 },
-  { to: "/customers", label: "Customers", icon: Users },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/customers",       label: "Customers",       icon: Users },
+  { to: "/settings",        label: "Settings",        icon: Settings },
 ];
 
 const COMING_SOON = [
-  { label: "Payroll", icon: Wallet },
+  { label: "Payroll",   icon: Wallet },
   { label: "Transfers", icon: Send },
 ];
 
@@ -82,7 +84,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 export function Sidebar() {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-[var(--color-line)] bg-[var(--color-surface)] md:flex">
-      <div className="flex h-14 items-center px-5 border-b border-[var(--color-line)]">
+      <div className="flex h-14 items-center border-b border-[var(--color-line)] px-5">
         <Logo />
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto py-3">

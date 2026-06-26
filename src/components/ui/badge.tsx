@@ -2,6 +2,8 @@ import { type HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { STATUS_LABEL } from "@/lib/format";
 import type { InvoiceStatus } from "@/types/invoice";
+import type { QuotationStatus } from "@/types/quotation";
+import { QUOTE_STATUS_LABEL } from "@/lib/format";
 
 export function Badge({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return (
@@ -36,4 +38,22 @@ export function InvoiceStatusBadge({ status }: { status: InvoiceStatus }) {
 
 export function statusRailStyle(status: InvoiceStatus) {
   return { borderLeftColor: `var(--color-status-${status})` };
+}
+
+// Quotation status uses its own token set; colours defined in index.css
+export function QuotationStatusBadge({ status }: { status: QuotationStatus }) {
+  const color = `var(--color-qstatus-${status})`;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-[var(--radius-chip)] px-2 py-0.5 text-xs font-medium"
+      style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
+    >
+      <span className="size-1.5 rounded-full" style={{ backgroundColor: color }} />
+      {QUOTE_STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+export function quoteStatusRailStyle(status: QuotationStatus) {
+  return { borderLeftColor: `var(--color-qstatus-${status})` };
 }

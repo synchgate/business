@@ -116,6 +116,19 @@
   }
 }
 
+
+/* ── Quotation status tokens ─────────────────────────────────────── */
+:root {
+  --color-qstatus-draft:     #8a93a6;
+  --color-qstatus-sent:      #1849d6;
+  --color-qstatus-viewed:    #7c3aed;
+  --color-qstatus-accepted:  #138a5e;
+  --color-qstatus-rejected:  #c0392b;
+  --color-qstatus-expired:   #c8801a;
+  --color-qstatus-converted: #0e7490;
+  --color-qstatus-cancelled: #4b5366;
+}
+
 /* ── Print styles ────────────────────────────────────────────────── */
 @media print {
   @page {

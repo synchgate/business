@@ -1,4 +1,6 @@
 import type { InvoiceStatus } from "@/types/invoice";
+import type { QuotationStatus } from "@/types/quotation";
+
 
 const CURRENCY_LOCALE: Record<string, string> = {
   NGN: "en-NG",
@@ -54,3 +56,14 @@ export function daysUntil(dateStr: string) {
   date.setHours(0, 0, 0, 0);
   return Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
+
+export const QUOTE_STATUS_LABEL: Record<QuotationStatus, string> = {
+  draft:     "Draft",
+  sent:      "Sent",
+  viewed:    "Viewed",
+  accepted:  "Accepted",
+  rejected:  "Rejected",
+  expired:   "Expired",
+  converted: "Converted",
+  cancelled: "Cancelled",
+};
