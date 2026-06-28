@@ -19,6 +19,7 @@ import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
 import { formatDate } from "@/lib/format";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 const schema = z.object({
   business_name: z.string().min(1, "Required"),
@@ -36,6 +37,7 @@ type FormValues = z.infer<typeof schema>;
 function ProfileTab() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
   const profileSchema = z.object({
     first_name: z.string().min(1, "Required"),
     last_name: z.string().min(1, "Required"),
@@ -53,6 +55,19 @@ function ProfileTab() {
   });
   const profile = detail?.profile;
 
+  // ── image state ──────────────────────────────────────────────────────────
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setAvatarFile(file);
+    if (file) {
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     values: profile ? {
@@ -67,7 +82,17 @@ function ProfileTab() {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: ProfileForm) => updateProfile(values),
+    mutationFn: (values: ProfileForm) => {
+      // If there's an image, send as multipart; otherwise send JSON as before
+      if (avatarFile) {
+        const fd = new FormData();
+        Object.entries(values).forEach(([k, v]) => fd.append(k, v ?? ""));
+        // fd.append("avatar", avatarFile);
+        fd.append("image", avatarFile);
+        return updateProfile(fd);
+      }
+      return updateProfile(values);
+    },
     onSuccess: () => {
       toast.success("Profile updated.");
       queryClient.invalidateQueries({ queryKey: ["auth", "userDetail"] });
@@ -79,6 +104,10 @@ function ProfileTab() {
 
   if (isLoading || !user) return <Skeleton className="h-64 w-full" />;
 
+  // resolve what src to show: new preview → existing avatar → initials fallback
+  const displaySrc = avatarPreview ?? profile?.image ?? null;
+  const initials = [profile?.first_name?.[0], profile?.last_name?.[0]].filter(Boolean).join("").toUpperCase();
+
   return (
     <form onSubmit={handleSubmit((v) => mutation.mutate(v))}>
       <Card>
@@ -86,6 +115,42 @@ function ProfileTab() {
           <CardTitle>Personal profile</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
+
+          {/* ── Avatar upload ─────────────────────────────────────────────── */}
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Profile photo</Label>
+            <div className="flex items-center gap-4">
+              {/* Preview circle */}
+              <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-surface-muted)] text-sm font-medium text-[var(--color-muted)]">
+                {displaySrc ? (
+                  <img src={displaySrc} alt="Avatar" className="size-full object-cover" />
+                ) : (
+                  <span>{initials || "?"}</span>
+                )}
+              </div>
+              {/* Hidden file input triggered by button */}
+              <div className="space-y-1">
+                <label htmlFor="avatar_upload">
+                  <span className="inline-flex h-9 cursor-pointer items-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-muted)]">
+                    {avatarFile ? "Change photo" : "Upload photo"}
+                  </span>
+                  <input
+                    id="avatar_upload"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="sr-only"
+                    onChange={handleAvatarChange}
+                  />
+                </label>
+                <p className="text-xs text-[var(--color-muted)]">PNG, JPG or WebP · max 2 MB</p>
+                {avatarFile && (
+                  <p className="text-xs text-[var(--color-muted)]">{avatarFile.name}</p>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* ─────────────────────────────────────────────────────────────── */}
+
           <div className="space-y-1.5">
             <Label htmlFor="first_name">First name</Label>
             <Input id="first_name" {...register("first_name")} />

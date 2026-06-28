@@ -56,10 +56,12 @@ export async function getUserDetail() {
   return data.data;
 }
 
-export async function updateProfile(input: Record<string, unknown>) {
+export async function updateProfile(input: Record<string, unknown> | FormData) {
+  const isFormData = input instanceof FormData;
   const { data } = await apiClient.patch<ApiSuccessEnvelope<unknown>>(
     "accounts/profile/update/",
     input,
+    isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined,
   );
   return data.data;
 }
