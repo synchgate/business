@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, Trash2, ChevronLeft, Loader2, User, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -115,8 +115,11 @@ function CustomerPicker({ onSelect, selectedId }: {
 
 // ── Main page ─────────────────────────────────────────────────────
 export function QuotationCreatePage() {
-  const navigate       = useNavigate();
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    searchParams.get("customer"),
+  );
   const createQuotation = useCreateQuotation();
   const { data: preloadedCustomer } = useCustomer(selectedCustomerId ?? undefined);
 

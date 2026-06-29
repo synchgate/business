@@ -113,7 +113,7 @@ export function CustomerListPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-[var(--color-body)]">{formatDate(c.created_at)}</TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <Button
                           size="sm"
                           variant="secondary"
@@ -122,7 +122,27 @@ export function CustomerListPage() {
                         >
                           <Link to={`/invoices/new?customer=${c.id}`}>Invoice</Link>
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
+                      <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link to={`/invoices/new?customer=${c.id}`}>Invoice</Link>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link to={`/quotes/new?customer=${c.id}`}>Quote</Link>
+                        </Button>
+                      </div>
+                    </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
