@@ -5,15 +5,16 @@ import {
   Ban,
   Bell,
   Copy,
-  ExternalLink,
-  FileDown,
-  Link2,
-  Loader2,
   Pencil,
   Printer,
   Send,
   Trash2,
   ChevronLeft,
+  PlusCircle,
+  Loader2,
+  Link2,
+  FileDown,
+  ExternalLink,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,9 +44,11 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
 import { Logo } from "@/components/logo";
+import { RecordPaymentDialog } from "@/features/invoices/record-payment-dialog";
+import { PaymentHistory } from "@/features/invoices/payment-history";
 import { generateReceiptPdf } from "@/lib/pdf-receipt";
 
-const PUBLIC_BASE = `${window.location.origin}/pay`;
+const PUBLIC_BASE = `${window.location.origin}/invoice`;
 
 function isNotImplemented(err: unknown) {
   return isAxiosError(err) && (err.response?.status === 404 || err.response?.status === 405);
@@ -61,6 +64,7 @@ export function InvoiceDetailPage() {
   const deleteInvoice = useDeleteInvoice();
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showRecordPayment, setShowRecordPayment] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
   // Virtual / settlement account for print
@@ -87,6 +91,7 @@ export function InvoiceDetailPage() {
   const canSend = invoice.status === "draft" || invoice.status === "sent";
   const canCancel = !["paid", "cancelled"].includes(invoice.status);
   const canRemind = ["sent", "viewed", "partially_paid", "overdue"].includes(invoice.status);
+  const canRecordPayment = !["paid", "cancelled"].includes(invoice.status);
 
   // Public shareable URL
   const shareableUrl = `${PUBLIC_BASE}/${invoice.invoice_number}`;
@@ -173,6 +178,12 @@ export function InvoiceDetailPage() {
 
         {/* Action buttons — scroll horizontally on tiny screens */}
         <div className="flex flex-wrap gap-2">
+          {canRecordPayment && (
+            <Button size="sm" onClick={() => setShowRecordPayment(true)}>
+              <PlusCircle className="size-4" />
+              Record payment
+            </Button>
+          )}
           {canSend && (
             <Button size="sm" onClick={handleSend} disabled={sendInvoice.isPending}>
               {sendInvoice.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
@@ -442,6 +453,15 @@ export function InvoiceDetailPage() {
         </Card>
       )}
 
+      {/* Payment history timeline */}
+      <PaymentHistory invoiceId={invoice.id} currency={invoice.currency} />
+
+      {/* Record Payment dialog */}
+      <RecordPaymentDialog
+        open={showRecordPayment}
+        onOpenChange={setShowRecordPayment}
+        invoice={invoice}
+      />
       {/* Confirm cancel */}
       <Dialog open={confirmCancel} onOpenChange={setConfirmCancel}>
         <DialogContent>

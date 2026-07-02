@@ -197,7 +197,7 @@ export function PublicInvoicePage() {
               <p className="text-center text-xs text-[var(--color-muted)]">
                 Powered by{" "}
                 <a
-                  href="https://synchgate.com"
+                  href="https://biz.synchgate.com"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[var(--color-primary)] hover:underline"

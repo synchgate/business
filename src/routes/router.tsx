@@ -59,7 +59,7 @@ export const router = createBrowserRouter([
   { path: "/", element: wrap(<LandingPage />) },
 
   // ── Public pages (no auth) ────────────────────────────────────
-  { path: "/pay/:invoiceNumber",   element: wrap(<PublicInvoicePage />) },
+  { path: "/invoice/:invoiceNumber",   element: wrap(<PublicInvoicePage />) },
   { path: "/quote/:quoteNumber",   element: wrap(<PublicQuotationPage />) },
 
   // ── Guest-only auth pages ─────────────────────────────────────
