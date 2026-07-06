@@ -52,7 +52,7 @@ const FEATURES = [
   },
 ];
 
-// ── Why Synchgate stats ───────────────────────────────────────────
+// ── Why EBS stats ───────────────────────────────────────────
 const STATS = [
   { value: "₦0", label: "Monthly fees" },
   { value: "<1min", label: "To create an invoice" },
@@ -138,7 +138,7 @@ export function LandingPage() {
             in one place
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-[var(--color-body)] md:text-xl">
-            Synchgate gives African businesses a complete financial operating system — professional invoicing, virtual bank accounts, payroll, and business payments, all connected.
+            Entacrest Business Suite (EBS) gives African businesses a complete financial operating system — professional invoicing, virtual bank accounts, payroll, and business payments, all connected.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Button size="lg" asChild>
@@ -496,7 +496,7 @@ export function LandingPage() {
             Ready to take control of your business finances?
           </h2>
           <p className="mt-4 text-blue-100">
-            Join thousands of African businesses using Synchgate. Free to start, no credit card needed.
+            Join thousands of African businesses using EBS. Free to start, no credit card needed.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Button
@@ -533,7 +533,7 @@ export function LandingPage() {
               <a href="#" className="hover:text-[var(--color-ink)]">API Docs</a>
             </div>
             <p className="text-xs text-[var(--color-muted)]">
-              © {new Date().getFullYear()} Entacrest · Synchgate. All rights reserved.
+              © {new Date().getFullYear()} Entacrest · EBS. All rights reserved.
             </p>
           </div>
         </div>
