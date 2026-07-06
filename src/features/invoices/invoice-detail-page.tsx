@@ -301,7 +301,7 @@ export function InvoiceDetailPage() {
                   Copy link
                 </button>
               ) : (
-                <p className="mt-1 text-sm text-[var(--color-muted)]">Pending settlement setup</p>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">Payment link not available</p>
               )}
             </div>
           </div>
