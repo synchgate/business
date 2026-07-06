@@ -110,6 +110,7 @@ export function DashboardPage() {
                       <TableHead>Customer</TableHead>
                       <TableHead>Due</TableHead>
                       <TableHead>Amount</TableHead>
+                      <TableHead>Amount Paid</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -124,6 +125,7 @@ export function DashboardPage() {
                         <TableCell className="text-sm">{invoice.customer_name}</TableCell>
                         <TableCell className="font-ledger text-sm text-[var(--color-body)]">{formatDate(invoice.due_date)}</TableCell>
                         <TableCell className="font-ledger text-sm">{formatMoney(invoice.total_amount, invoice.currency)}</TableCell>
+                        <TableCell className="font-ledger text-sm">{formatMoney(invoice.amount_paid, invoice.currency)}</TableCell>
                         <TableCell><InvoiceStatusBadge status={invoice.status} /></TableCell>
                       </TableRow>
                     ))}
