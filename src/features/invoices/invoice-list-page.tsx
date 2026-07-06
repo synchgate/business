@@ -108,6 +108,7 @@ export function InvoiceListPage() {
                       <TableHead>Issued</TableHead>
                       <TableHead>Due</TableHead>
                       <TableHead>Amount</TableHead>
+                      <TableHead>Amount Paid</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -133,6 +134,9 @@ export function InvoiceListPage() {
                         </TableCell>
                         <TableCell className="font-ledger text-sm">
                           {formatMoney(invoice.total_amount, invoice.currency)}
+                        </TableCell>
+                        <TableCell className="font-ledger text-sm">
+                          {formatMoney(invoice.amount_paid, invoice.currency)}
                         </TableCell>
                         <TableCell>
                           <InvoiceStatusBadge status={invoice.status} />
