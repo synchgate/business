@@ -92,7 +92,7 @@ export function Sidebar() {
       </div>
       <div className="border-t border-[var(--color-line)] p-4">
         <p className="text-[10px] text-[var(--color-muted)]">Banking Business Platform</p>
-        <p className="text-[10px] text-[var(--color-muted)]">invoice.synchgate.com</p>
+        <p className="text-[10px] text-[var(--color-muted)]">ebs.entacrest.com</p>
       </div>
     </aside>
   );

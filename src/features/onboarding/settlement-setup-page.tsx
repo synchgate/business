@@ -51,7 +51,7 @@ export function SettlementSetupPage() {
 
   const setupMutation = useMutation({
     mutationFn: (values: FormValues) =>
-      setupSettlementAccount({ settlement_bank: values.bank_code, account_number: values.account_number }),
+      setupSettlementAccount({ settlement_bank: values.bank_code, account_number: values.account_number, bank_name: NIGERIAN_BANKS.find((b) => b.code === values.bank_code)?.name || "" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["merchant", "settlementAccount"] });
       navigate("/dashboard", { replace: true });

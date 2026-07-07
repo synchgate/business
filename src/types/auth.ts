@@ -111,6 +111,7 @@ export interface SettlementAccount {
 export interface SubaccountSetupInput {
   settlement_bank: string;
   account_number: string;
+  bank_name: string;
 }
 
 export interface AccountVerifyInput {
