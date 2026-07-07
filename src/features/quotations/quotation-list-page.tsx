@@ -116,7 +116,7 @@ export function QuotationListPage() {
                       <TableRow key={q.id} className="border-l-2" style={quoteStatusRailStyle(q.status)}>
                         <TableCell>
                           <Link to={`/quotes/${q.id}`} className="font-ledger text-[var(--color-primary)]">
-                            {q.quote_number}
+                            {q.quote_number.split("-").slice(0, 3).join("-")}
                           </Link>
                         </TableCell>
                         <TableCell>
