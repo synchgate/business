@@ -119,7 +119,7 @@ export function DashboardPage() {
                       <TableRow key={invoice.id} className="cursor-pointer border-l-2" style={statusRailStyle(invoice.status)}>
                         <TableCell>
                           <Link to={`/invoices/${invoice.id}`} className="font-ledger text-[var(--color-primary)]">
-                            {invoice.invoice_number}
+                            {invoice.invoice_number.split("-").slice(0, 3).join("-")}
                           </Link>
                         </TableCell>
                         <TableCell className="text-sm">{invoice.customer_name}</TableCell>
