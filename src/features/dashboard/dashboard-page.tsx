@@ -143,7 +143,7 @@ export function DashboardPage() {
                     style={statusRailStyle(invoice.status)}
                   >
                     <div className="min-w-0">
-                      <p className="font-ledger text-sm text-[var(--color-primary)]">{invoice.invoice_number}</p>
+                      <p className="font-ledger text-sm text-[var(--color-primary)]">{invoice.invoice_number.split("-").slice(0, 3).join("-")}</p>
                       <p className="text-sm text-[var(--color-ink)] truncate">{invoice.customer_name}</p>
                     </div>
                     <div className="text-right shrink-0">
