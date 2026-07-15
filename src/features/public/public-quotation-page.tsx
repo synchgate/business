@@ -252,7 +252,7 @@ export function PublicQuotationPage() {
 
               <p className="text-center text-xs text-[var(--color-muted)]">
                 Powered by{" "}
-                <a href="https://synchgate.com" target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline">Synchgate</a>
+                <a href="https://ebs.entacrest.com" target="_blank" rel="noreferrer" className="text-[var(--color-primary)] hover:underline">Entacrest</a>
               </p>
             </div>
           )}

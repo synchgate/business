@@ -189,7 +189,7 @@ export function PublicInvoicePage() {
                 </Button>
               ) : (
                 <p className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3 text-center text-sm text-[var(--color-muted)]">
-                  Payment isn't available for this invoice yet.
+                  Payment link available for this invoice.
                 </p>
               )}
 
@@ -197,12 +197,12 @@ export function PublicInvoicePage() {
               <p className="text-center text-xs text-[var(--color-muted)]">
                 Powered by{" "}
                 <a
-                  href="https://biz.synchgate.com"
+                  href="https://ebs.entacrest.com"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[var(--color-primary)] hover:underline"
                 >
-                  Synchgate
+                  Entacrest
                 </a>
               </p>
             </div>
