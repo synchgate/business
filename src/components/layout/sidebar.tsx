@@ -6,9 +6,11 @@ import {
   Settings,
   Building2,
   X,
-  Wallet,
   Send,
   ClipboardList,
+  Wallet,
+  UserCog,
+  Landmark,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
@@ -19,11 +21,13 @@ const NAV_ITEMS = [
   { to: "/quotes",          label: "Quotations",      icon: ClipboardList },
   { to: "/virtual-account", label: "Virtual Account", icon: Building2 },
   { to: "/customers",       label: "Customers",       icon: Users },
+  { to: "/payroll/runs",    label: "Payroll",         icon: Wallet },
+  { to: "/compliance",      label: "Tax & Compliance", icon: Landmark },
+  { to: "/team",            label: "Team",            icon: UserCog },
   { to: "/settings",        label: "Settings",        icon: Settings },
 ];
 
 const COMING_SOON = [
-  { label: "Payroll",   icon: Wallet },
   { label: "Transfers", icon: Send },
 ];
 

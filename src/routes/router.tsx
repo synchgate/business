@@ -29,6 +29,19 @@ const QuotationEditPage   = lazy(() => import("@/features/quotations/quotation-e
 const CustomerListPage   = lazy(() => import("@/features/customers/customer-list-page").then((m) => ({ default: m.CustomerListPage })));
 const CustomerDetailPage = lazy(() => import("@/features/customers/customer-detail-page").then((m) => ({ default: m.CustomerDetailPage })));
 
+// Team
+const TeamPage = lazy(() => import("@/features/team/team-page").then((m) => ({ default: m.TeamPage })));
+
+// Payroll
+const EmployeeListPage      = lazy(() => import("@/features/payroll/employee-list-page").then((m) => ({ default: m.EmployeeListPage })));
+const EmployeeDetailPage    = lazy(() => import("@/features/payroll/employee-detail-page").then((m) => ({ default: m.EmployeeDetailPage })));
+const PayrollRunListPage    = lazy(() => import("@/features/payroll/payroll-run-list-page").then((m) => ({ default: m.PayrollRunListPage })));
+const PayrollRunDetailPage  = lazy(() => import("@/features/payroll/payroll-run-detail-page").then((m) => ({ default: m.PayrollRunDetailPage })));
+const SalaryAdvancesPage    = lazy(() => import("@/features/payroll/salary-advances-page").then((m) => ({ default: m.SalaryAdvancesPage })));
+
+// Compliance
+const CompliancePage = lazy(() => import("@/features/compliance/compliance-page").then((m) => ({ default: m.CompliancePage })));
+
 // Other
 const VirtualAccountPage = lazy(() => import("@/features/virtual-account/virtual-account-page").then((m) => ({ default: m.VirtualAccountPage })));
 const SettingsPage       = lazy(() => import("@/features/settings/settings-page").then((m) => ({ default: m.SettingsPage })));
@@ -105,6 +118,19 @@ export const router = createBrowserRouter([
               // Customers
               { path: "/customers",     element: wrap(<CustomerListPage />),   handle: { title: "Customers" } },
               { path: "/customers/:id", element: wrap(<CustomerDetailPage />), handle: { title: "Customer" } },
+
+              // Team
+              { path: "/team", element: wrap(<TeamPage />), handle: { title: "Team" } },
+
+              // Payroll
+              { path: "/payroll/employees",     element: wrap(<EmployeeListPage />),   handle: { title: "Employees" } },
+              { path: "/payroll/employees/:id", element: wrap(<EmployeeDetailPage />), handle: { title: "Employee" } },
+              { path: "/payroll/runs",          element: wrap(<PayrollRunListPage />), handle: { title: "Payroll runs" } },
+              { path: "/payroll/runs/:id",      element: wrap(<PayrollRunDetailPage />), handle: { title: "Payroll run" } },
+              { path: "/payroll/advances",      element: wrap(<SalaryAdvancesPage />), handle: { title: "Salary advances" } },
+
+              // Compliance
+              { path: "/compliance", element: wrap(<CompliancePage />), handle: { title: "Tax & Compliance" } },
 
               // Settings
               { path: "/settings", element: wrap(<SettingsPage />), handle: { title: "Settings" } },
