@@ -32,6 +32,7 @@ const CustomerDetailPage = lazy(() => import("@/features/customers/customer-deta
 
 // Team
 const TeamPage = lazy(() => import("@/features/team/team-page").then((m) => ({ default: m.TeamPage })));
+const AcceptInvitePage = lazy(() => import("@/features/team/accept-invite-page").then((m) => ({ default: m.AcceptInvitePage })));
 
 // Payroll
 const EmployeeListPage      = lazy(() => import("@/features/payroll/employee-list-page").then((m) => ({ default: m.EmployeeListPage })));
@@ -93,6 +94,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       { path: "/onboarding/settlement", element: wrap(<SettlementSetupPage />) },
+      { path: "/team/accept-invite", element: wrap(<AcceptInvitePage />) },
       {
         element: <RequireOnboarded />,
         children: [

@@ -200,7 +200,7 @@ function ProfileTab() {
 
 function PlanTab() {
   const { data: activeSubscription, isLoading: subLoading } = useCurrentSubscription();
-  const { data: usage, isLoading: usageLoading } = useMerchantUsage();
+  const { isLoading: usageLoading } = useMerchantUsage();
   const { data: plans } = usePlans();
   const subscribe = useSubscribeMutation();
   const [searchParams, setSearchParams] = useSearchParams();
