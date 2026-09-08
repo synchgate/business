@@ -50,6 +50,8 @@ export interface InvoiceDetail extends InvoiceListEntry {
   terms: string | null;
   platform_fee: string;
   items: InvoiceItem[];
+  merchant_name: string;
+  merchant_logo: string | null;
   sent_at: string | null;
   paid_at: string | null;
   updated_at: string;

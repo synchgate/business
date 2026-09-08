@@ -43,7 +43,7 @@ import { useSettlementAccount } from "@/hooks/use-settlement-account";
 import { formatDate, formatMoney } from "@/lib/format";
 import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
-import { Logo } from "@/components/logo";
+import { MerchantBrand } from "@/features/invoices/merchant-brand";
 import { RecordPaymentDialog } from "@/features/invoices/record-payment-dialog";
 import { PaymentHistory } from "@/features/invoices/payment-history";
 import { generateReceiptPdf } from "@/lib/pdf-receipt";
@@ -262,7 +262,7 @@ export function InvoiceDetailPage() {
           {/* Header row */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <Logo />
+              <MerchantBrand logo={invoice.merchant_logo} name={invoice.merchant_name} />
               <p className="mt-3 font-ledger text-base font-medium text-[var(--color-ink)] sm:text-lg">
                 {invoice.invoice_number.split("-").slice(0, 3).join("-")}
               </p>

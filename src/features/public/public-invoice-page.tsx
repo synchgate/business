@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Copy, ExternalLink } from "lucide-react";
 import { getPublicInvoice } from "@/api/endpoints/invoices";
-import { Logo } from "@/components/logo";
+import { MerchantBrand } from "@/features/invoices/merchant-brand";
 import { Button } from "@/components/ui/button";
 import { InvoiceStatusBadge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,7 +34,7 @@ export function PublicInvoicePage() {
       {/* Nav bar */}
       <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <Logo />
+          <MerchantBrand logo={invoice?.merchant_logo ?? null} name={invoice?.merchant_name ?? ""} />
           <button
             onClick={handleCopyLink}
             className="flex items-center gap-1.5 rounded-[var(--radius-chip)] px-2.5 py-1.5 text-xs text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-ink)] transition-colors"
