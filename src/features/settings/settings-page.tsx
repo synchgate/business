@@ -289,7 +289,7 @@ function PlanTab() {
         </CardContent>
       </Card>
 
-      {usage && (
+      {/* {usage && (
         <Card>
           <CardHeader>
             <CardTitle>Usage & credits</CardTitle>
@@ -325,7 +325,7 @@ function PlanTab() {
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
     </div>
   );
 }
