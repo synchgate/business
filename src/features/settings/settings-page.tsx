@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMerchantUsage, usePlans, useSubscribeMutation, useSubscriptions } from "@/hooks/use-billing";
+import { useCurrentSubscription, useMerchantUsage, usePlans, useSubscribeMutation } from "@/hooks/use-billing";
 import { formatMoney } from "@/lib/format";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -199,15 +199,17 @@ function ProfileTab() {
 }
 
 function PlanTab() {
-  const { data: subscriptions, isLoading: subLoading } = useSubscriptions();
+  const { data: activeSubscription, isLoading: subLoading } = useCurrentSubscription();
   const { data: usage, isLoading: usageLoading } = useMerchantUsage();
   const { data: plans } = usePlans();
   const subscribe = useSubscribeMutation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!searchParams.get("reference")) return;
     toast.success("Payment received — activating your plan…");
+    queryClient.invalidateQueries({ queryKey: ["billing", "subscriptions"] });
     const next = new URLSearchParams(searchParams);
     next.delete("reference");
     next.delete("trxref");
@@ -217,7 +219,6 @@ function PlanTab() {
 
   if (subLoading || usageLoading) return <Skeleton className="h-64 w-full" />;
 
-  const activeSubscription = subscriptions?.find((s) => s.is_active) ?? subscriptions?.[0];
   const plan = activeSubscription?.plan;
   const isOnPaidPlan = !!plan && Number(plan.price) > 0;
   const proPlan = plans?.find((p) => p.tier === "pro");
