@@ -12,7 +12,7 @@ export interface Plan {
 export interface MerchantSubscription {
   id: string;
   merchant: string;
-  plan: Plan;
+  plan: Plan | null;
   start_date: string | null;
   end_date: string | null;
   is_active: boolean;

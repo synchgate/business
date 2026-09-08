@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/app-shell";
 import { RequireAuth, RequireGuest, RequireOnboarded } from "@/routes/guards";
+import { RequireSubscription } from "@/components/require-subscription";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const LandingPage         = lazy(() => import("@/features/landing/landing-page").then((m) => ({ default: m.LandingPage })));
@@ -119,15 +120,15 @@ export const router = createBrowserRouter([
               { path: "/customers",     element: wrap(<CustomerListPage />),   handle: { title: "Customers" } },
               { path: "/customers/:id", element: wrap(<CustomerDetailPage />), handle: { title: "Customer" } },
 
-              // Team
-              { path: "/team", element: wrap(<TeamPage />), handle: { title: "Team" } },
+              // Team — Pro-plan feature
+              { path: "/team", element: wrap(<RequireSubscription><TeamPage /></RequireSubscription>), handle: { title: "Team" } },
 
-              // Payroll
-              { path: "/payroll/employees",     element: wrap(<EmployeeListPage />),   handle: { title: "Employees" } },
-              { path: "/payroll/employees/:id", element: wrap(<EmployeeDetailPage />), handle: { title: "Employee" } },
-              { path: "/payroll/runs",          element: wrap(<PayrollRunListPage />), handle: { title: "Payroll runs" } },
-              { path: "/payroll/runs/:id",      element: wrap(<PayrollRunDetailPage />), handle: { title: "Payroll run" } },
-              { path: "/payroll/advances",      element: wrap(<SalaryAdvancesPage />), handle: { title: "Salary advances" } },
+              // Payroll — Pro-plan feature
+              { path: "/payroll/employees",     element: wrap(<RequireSubscription><EmployeeListPage /></RequireSubscription>),   handle: { title: "Employees" } },
+              { path: "/payroll/employees/:id", element: wrap(<RequireSubscription><EmployeeDetailPage /></RequireSubscription>), handle: { title: "Employee" } },
+              { path: "/payroll/runs",          element: wrap(<RequireSubscription><PayrollRunListPage /></RequireSubscription>), handle: { title: "Payroll runs" } },
+              { path: "/payroll/runs/:id",      element: wrap(<RequireSubscription><PayrollRunDetailPage /></RequireSubscription>), handle: { title: "Payroll run" } },
+              { path: "/payroll/advances",      element: wrap(<RequireSubscription><SalaryAdvancesPage /></RequireSubscription>), handle: { title: "Salary advances" } },
 
               // Compliance
               { path: "/compliance", element: wrap(<CompliancePage />), handle: { title: "Tax & Compliance" } },

@@ -2,8 +2,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Sparkles, CheckCircle2 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMerchantUsage, useSubscriptions } from "@/hooks/use-billing";
+import { useMerchantUsage, usePlans, useSubscribeMutation, useSubscriptions } from "@/hooks/use-billing";
 import { formatMoney } from "@/lib/format";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import { readErrorMessage } from "@/api/envelope";
 import { toast } from "@/components/ui/toaster";
 import { formatDate } from "@/lib/format";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const schema = z.object({
   business_name: z.string().min(1, "Required"),
@@ -200,17 +201,50 @@ function ProfileTab() {
 function PlanTab() {
   const { data: subscriptions, isLoading: subLoading } = useSubscriptions();
   const { data: usage, isLoading: usageLoading } = useMerchantUsage();
+  const { data: plans } = usePlans();
+  const subscribe = useSubscribeMutation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams.get("reference")) return;
+    toast.success("Payment received — activating your plan…");
+    const next = new URLSearchParams(searchParams);
+    next.delete("reference");
+    next.delete("trxref");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (subLoading || usageLoading) return <Skeleton className="h-64 w-full" />;
 
   const activeSubscription = subscriptions?.find((s) => s.is_active) ?? subscriptions?.[0];
   const plan = activeSubscription?.plan;
+  const isOnPaidPlan = !!plan && Number(plan.price) > 0;
+  const proPlan = plans?.find((p) => p.tier === "pro");
+
+  const handleUpgrade = async () => {
+    if (!proPlan) return;
+    try {
+      const result = await subscribe.mutateAsync({
+        planId: proPlan.id,
+        callbackUrl: `${window.location.origin}/settings?tab=plan`,
+      });
+      window.location.href = result.payment_url;
+    } catch (err) {
+      toast.error(readErrorMessage((err as { response?: { data?: unknown } }).response?.data, "Couldn't start checkout."));
+    }
+  };
 
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Current plan</CardTitle>
+          {!isOnPaidPlan && proPlan && (
+            <Button size="sm" onClick={handleUpgrade} disabled={subscribe.isPending}>
+              {subscribe.isPending ? "Redirecting…" : `Upgrade to Pro — ${formatMoney(proPlan.price, "NGN")}/month`}
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {plan ? (
@@ -448,6 +482,9 @@ function ComingSoonTab({ title, description }: { title: string; description: str
 }
 
 export function SettingsPage() {
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") ?? "profile";
+
   return (
     <div className="space-y-6">
       <div>
@@ -455,7 +492,7 @@ export function SettingsPage() {
         <p className="text-sm text-[var(--color-body)]">Manage your business profile and invoicing preferences.</p>
       </div>
 
-      <Tabs defaultValue="profile">
+      <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="business">Business</TabsTrigger>
