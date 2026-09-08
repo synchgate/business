@@ -264,7 +264,7 @@ function PlanTab() {
                   {Number(plan.price) === 0 ? "Free" : formatMoney(plan.price, "NGN")}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-xs text-[var(--color-muted)]">Transaction limit</p>
                 <p className="font-ledger text-sm text-[var(--color-ink)]">
                   {plan.transaction_limit === 0 ? "Unlimited" : plan.transaction_limit.toLocaleString()}
@@ -275,7 +275,7 @@ function PlanTab() {
                 <p className="font-ledger text-sm text-[var(--color-ink)]">
                   {formatMoney(plan.fee_per_transaction, "NGN")} / transaction
                 </p>
-              </div>
+              </div> */}
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="size-4 text-[var(--color-status-paid)]" />
                 <span className="text-sm text-[var(--color-status-paid)]">
