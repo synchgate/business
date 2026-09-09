@@ -76,6 +76,11 @@ export const router = createBrowserRouter([
   // ── Public pages (no auth) ────────────────────────────────────
   { path: "/invoice/:invoiceNumber",   element: wrap(<PublicInvoicePage />) },
   { path: "/quote/:quoteNumber",   element: wrap(<PublicQuotationPage />) },
+  // Renders differently for logged-out vs logged-in visitors — must stay
+  // outside both RequireAuth (would force login first) and RequireGuest
+  // (would bounce an already-logged-in existing member away before they
+  // can accept).
+  { path: "/team/accept-invite", element: wrap(<AcceptInvitePage />) },
 
   // ── Guest-only auth pages ─────────────────────────────────────
   {
@@ -94,7 +99,6 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       { path: "/onboarding/settlement", element: wrap(<SettlementSetupPage />) },
-      { path: "/team/accept-invite", element: wrap(<AcceptInvitePage />) },
       {
         element: <RequireOnboarded />,
         children: [

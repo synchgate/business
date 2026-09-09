@@ -14,16 +14,19 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
+import { useActiveMembership } from "@/hooks/use-team";
 
+// `permission` is a teams.models.roles.Permission code — omit it for items
+// every active member should see regardless of role (Dashboard, Settings).
 const NAV_ITEMS = [
   { to: "/dashboard",       label: "Dashboard",      icon: LayoutDashboard },
-  { to: "/invoices",        label: "Invoices",        icon: FileText },
-  { to: "/quotes",          label: "Quotations",      icon: ClipboardList },
-  { to: "/virtual-account", label: "Virtual Account", icon: Building2 },
-  { to: "/customers",       label: "Customers",       icon: Users },
-  { to: "/payroll/runs",    label: "Payroll",         icon: Wallet },
-  { to: "/compliance",      label: "Tax & Compliance", icon: Landmark },
-  { to: "/team",            label: "Team",            icon: UserCog },
+  { to: "/invoices",        label: "Invoices",        icon: FileText,         permission: "invoicing.view" },
+  { to: "/quotes",          label: "Quotations",      icon: ClipboardList,    permission: "invoicing.view" },
+  { to: "/virtual-account", label: "Virtual Account", icon: Building2,        permission: "business.settings.view" },
+  { to: "/customers",       label: "Customers",       icon: Users,            permission: "invoicing.view" },
+  { to: "/payroll/runs",    label: "Payroll",         icon: Wallet,           permission: "payroll.view" },
+  { to: "/compliance",      label: "Tax & Compliance", icon: Landmark,        permission: "tax.view" },
+  { to: "/team",            label: "Team",            icon: UserCog,          permission: "team.view" },
   { to: "/settings",        label: "Settings",        icon: Settings },
 ];
 
@@ -32,6 +35,14 @@ const COMING_SOON = [
 ];
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { data: membership } = useActiveMembership();
+  const permissions = membership?.permissions;
+  // Hide nav items the caller's role can't open — before this resolves,
+  // show everything rather than flashing an empty sidebar.
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.permission || !permissions || permissions.includes(item.permission),
+  );
+
   return (
     <nav className="flex flex-1 flex-col">
       <div className="px-3 py-2">
@@ -39,7 +50,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           Platform
         </p>
         <div className="flex flex-col gap-0.5">
-          {NAV_ITEMS.map((item) => (
+          {visibleItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

@@ -1,41 +1,72 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { AuthLayout } from "@/features/auth/auth-layout";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { register as registerRequest } from "@/api/endpoints/auth";
+import { lookupTeamInvite } from "@/api/endpoints/team";
 import { readErrorMessage } from "@/api/envelope";
-
-// Mirrors accounts/serializers/auth.py RegisterSerializer constraints exactly
-// (password min_length=6, business_phone/business_name min_length=6).
-const schema = z.object({
-  business_name: z.string().min(6, "Business name must be at least 6 characters"),
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email("Enter a valid email address"),
-  business_phone: z.string().min(6, "Enter a valid phone number"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-type FormValues = z.infer<typeof schema>;
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get("invite");
+  const isInviteMode = !!inviteToken;
   const [serverError, setServerError] = useState<string | null>(null);
+
+  const { data: invite, isLoading: inviteLoading, isError: inviteError } = useQuery({
+    queryKey: ["team", "invite-lookup", inviteToken],
+    queryFn: () => lookupTeamInvite(inviteToken as string),
+    enabled: isInviteMode,
+    retry: false,
+  });
+
+  // Mirrors accounts/serializers/auth.py RegisterSerializer constraints —
+  // business_name/business_phone are only required outside invite mode,
+  // where the registrant is joining someone else's business instead of
+  // starting their own.
+  const schema = z.object({
+    first_name: z.string().min(1, "First name is required"),
+    last_name: z.string().min(1, "Last name is required"),
+    email: z.string().email("Enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    business_name: isInviteMode
+      ? z.string().optional()
+      : z.string().min(6, "Business name must be at least 6 characters"),
+    business_phone: isInviteMode
+      ? z.string().optional()
+      : z.string().min(6, "Enter a valid phone number"),
+  });
+  type FormValues = z.infer<typeof schema>;
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  useEffect(() => {
+    if (invite?.email) setValue("email", invite.email);
+  }, [invite, setValue]);
 
   const onSubmit = async (values: FormValues) => {
     setServerError(null);
     try {
-      await registerRequest(values);
-      navigate("/verify-email", { state: { email: values.email } });
+      await registerRequest({
+        ...values,
+        invite_token: isInviteMode ? inviteToken ?? undefined : undefined,
+      });
+      // Carried via URL (not just router state) so it survives a refresh
+      // or a link opened in a new tab anywhere along register→verify→login.
+      const params = new URLSearchParams({ email: values.email });
+      if (isInviteMode && inviteToken) params.set("invite", inviteToken);
+      navigate(`/verify-email?${params.toString()}`);
     } catch (err) {
       setServerError(
         readErrorMessage(
@@ -46,8 +77,33 @@ export function RegisterPage() {
     }
   };
 
+  if (isInviteMode && inviteLoading) {
+    return (
+      <AuthLayout title="Loading invite…">
+        <p className="text-sm text-[var(--color-body)]">One moment…</p>
+      </AuthLayout>
+    );
+  }
+
+  if (isInviteMode && inviteError) {
+    return (
+      <AuthLayout title="Invite not found">
+        <p className="text-sm text-[var(--color-body)]">
+          This invite link is invalid or has expired. Ask the business owner to send a new one.
+        </p>
+      </AuthLayout>
+    );
+  }
+
   return (
-    <AuthLayout title="Create your business account" description="Set up Synchgate Invoicing for your business.">
+    <AuthLayout
+      title={isInviteMode ? `Join ${invite?.business_name ?? "the team"}` : "Create your business account"}
+      description={
+        isInviteMode
+          ? `Create your account to join as ${invite?.role ?? "a team member"}.`
+          : "Set up Synchgate Invoicing for your business."
+      }
+    >
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -61,21 +117,25 @@ export function RegisterPage() {
             {errors.last_name && <p className="text-xs text-[var(--color-status-overdue)]">{errors.last_name.message}</p>}
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="business_name">Business name</Label>
-          <Input id="business_name" placeholder="Acme Stores Ltd" {...register("business_name")} />
-          {errors.business_name && <p className="text-xs text-[var(--color-status-overdue)]">{errors.business_name.message}</p>}
-        </div>
+        {!isInviteMode && (
+          <div className="space-y-1.5">
+            <Label htmlFor="business_name">Business name</Label>
+            <Input id="business_name" placeholder="Acme Stores Ltd" {...register("business_name")} />
+            {errors.business_name && <p className="text-xs text-[var(--color-status-overdue)]">{errors.business_name.message}</p>}
+          </div>
+        )}
         <div className="space-y-1.5">
           <Label htmlFor="email">Work email</Label>
-          <Input id="email" type="email" placeholder="you@business.com" {...register("email")} />
+          <Input id="email" type="email" placeholder="you@business.com" readOnly={isInviteMode} {...register("email")} />
           {errors.email && <p className="text-xs text-[var(--color-status-overdue)]">{errors.email.message}</p>}
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="business_phone">Business phone</Label>
-          <Input id="business_phone" placeholder="+234…" {...register("business_phone")} />
-          {errors.business_phone && <p className="text-xs text-[var(--color-status-overdue)]">{errors.business_phone.message}</p>}
-        </div>
+        {!isInviteMode && (
+          <div className="space-y-1.5">
+            <Label htmlFor="business_phone">Business phone</Label>
+            <Input id="business_phone" placeholder="+234…" {...register("business_phone")} />
+            {errors.business_phone && <p className="text-xs text-[var(--color-status-overdue)]">{errors.business_phone.message}</p>}
+          </div>
+        )}
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" {...register("password")} />

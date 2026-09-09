@@ -20,8 +20,11 @@ export interface RegisterInput {
   password: string;
   first_name: string;
   last_name: string;
-  business_name: string;
-  business_phone: string;
+  // Required unless registering via invite_token — the invitee joins the
+  // inviter's business instead of starting their own.
+  business_name?: string;
+  business_phone?: string;
+  invite_token?: string;
 }
 
 export interface VerifyOtpInput {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "@/features/auth/auth-layout";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -18,9 +18,12 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function VerifyEmailPage() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const prefillEmail = (location.state as { email?: string })?.email ?? "";
+  const [searchParams] = useSearchParams();
+  // Carried via URL, not router state — must survive a refresh or a link
+  // opened fresh (e.g. from an email client) partway through this flow.
+  const prefillEmail = searchParams.get("email") ?? "";
+  const inviteToken = searchParams.get("invite");
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -33,7 +36,7 @@ export function VerifyEmailPage() {
     try {
       await verifyOtp({ email: values.email, purpose: "email", otp: values.otp });
       toast.success("Email verified — you can log in now.");
-      navigate("/login");
+      navigate(inviteToken ? `/login?invite=${inviteToken}` : "/login");
     } catch (err) {
       setServerError(
         readErrorMessage(

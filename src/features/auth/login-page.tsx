@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "@/features/auth/auth-layout";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,11 @@ export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  // Carried via URL from the invite→register→verify chain — survives a
+  // refresh, unlike router state, in case this page was reached directly
+  // (not via RequireAuth's own state.from redirect).
+  const inviteToken = searchParams.get("invite");
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -31,7 +36,8 @@ export function LoginPage() {
     setServerError(null);
     try {
       await login(values.email, values.password);
-      const redirectTo = (location.state as { from?: string })?.from ?? "/dashboard";
+      const stateFrom = (location.state as { from?: string })?.from;
+      const redirectTo = stateFrom ?? (inviteToken ? `/team/accept-invite?token=${inviteToken}` : "/dashboard");
       navigate(redirectTo, { replace: true });
     } catch (err) {
       // The backend can't distinguish "wrong password" from "email not

@@ -62,3 +62,18 @@ export async function acceptTeamInvite(token: string) {
   >("teams/invites/accept/", { token });
   return data.data;
 }
+
+export interface TeamInviteLookup {
+  email: string;
+  business_name: string;
+  role: string;
+}
+
+// Public — no auth required, used to show the invite landing before login/register.
+export async function lookupTeamInvite(token: string) {
+  const { data } = await apiClient.get<ApiSuccessEnvelope<TeamInviteLookup>>(
+    "teams/invites/lookup/",
+    { params: { token } },
+  );
+  return data.data;
+}
