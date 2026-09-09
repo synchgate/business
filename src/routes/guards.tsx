@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 import { useSettlementAccount } from "@/hooks/use-settlement-account";
 import { useActiveMembership } from "@/hooks/use-team";
@@ -52,6 +52,15 @@ export function RequireOnboarded() {
 // The landing page (/) is always public — don't use RequireGuest there.
 export function RequireGuest() {
   const { isAuthenticated } = useAuth();
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  const [searchParams] = useSearchParams();
+  // If the same instant the caller becomes authenticated (e.g. right after
+  // submitting the login form) races LoginPage's own post-login navigate,
+  // this redirect must agree on the same destination rather than always
+  // winning with /dashboard and skipping the pending invite-accept step.
+  const inviteToken = searchParams.get("invite");
+
+  if (isAuthenticated) {
+    return <Navigate to={inviteToken ? `/team/accept-invite?token=${inviteToken}` : "/dashboard"} replace />;
+  }
   return <Outlet />;
 }
