@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Receipt } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Download, Printer, Receipt, Search, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState, ErrorState } from "@/components/ui/state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +11,7 @@ import { PosTabs } from "@/features/pos/pos-tabs";
 import { useSaleList, useSaleDetail, useTodaySalesSummary } from "@/hooks/use-pos";
 import { formatMoney, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { downloadSaleReceiptPdf, printSaleReceipt } from "@/lib/sale-receipt";
 import type { SalePeriod } from "@/types/pos";
 
 const PERIODS: { value: SalePeriod; label: string }[] = [
@@ -22,14 +24,35 @@ const PERIODS: { value: SalePeriod; label: string }[] = [
 export function SalesHistoryPage() {
   const [period, setPeriod] = useState<SalePeriod>("today");
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [date, setDate] = useState("");
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useSaleList({ period, page });
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data, isLoading, isError, refetch } = useSaleList({
+    period,
+    page,
+    search: debouncedSearch || undefined,
+    date: date || undefined,
+  });
   const { data: summary } = useTodaySalesSummary(period);
   const sales = data?.results ?? [];
 
   function changePeriod(next: SalePeriod) {
     setPeriod(next);
+    setPage(1);
+  }
+
+  function changeDate(next: string) {
+    setDate(next);
     setPage(1);
   }
 
@@ -70,6 +93,40 @@ export function SalesHistoryPage() {
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-muted)]" />
+          <Input
+            placeholder="Search by sale ref or payment method"
+            className="pl-9 pr-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+              aria-label="Clear search"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+        </div>
+        <Input
+          type="date"
+          value={date}
+          onChange={(e) => changeDate(e.target.value)}
+          className="w-auto"
+          aria-label="Filter by date"
+        />
+        {date && (
+          <Button variant="secondary" size="sm" onClick={() => changeDate("")}>
+            Clear date
+          </Button>
+        )}
+      </div>
+
       <Card>
         <CardContent className="px-0 pb-0">
           {isLoading ? (
@@ -83,8 +140,12 @@ export function SalesHistoryPage() {
           ) : sales.length === 0 ? (
             <EmptyState
               icon={Receipt}
-              title="No sales yet"
-              description={`No sales recorded for ${PERIODS.find((p) => p.value === period)?.label.toLowerCase()}.`}
+              title="No sales found"
+              description={
+                debouncedSearch || date
+                  ? "No sales match your search or date filter."
+                  : `No sales recorded for ${PERIODS.find((p) => p.value === period)?.label.toLowerCase()}.`
+              }
             />
           ) : (
             <>
@@ -192,6 +253,26 @@ function SaleDetailDialog({
                   <span className="font-ledger text-[var(--color-body)]">{formatMoney(item.amount)}</span>
                 </div>
               ))}
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Button
+                type="button"
+                variant="secondary"
+                className="flex-1"
+                onClick={() => printSaleReceipt(sale)}
+              >
+                <Printer className="size-4" />
+                Print
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="flex-1"
+                onClick={() => downloadSaleReceiptPdf(sale)}
+              >
+                <Download className="size-4" />
+                Download PDF
+              </Button>
             </div>
           </div>
         )}

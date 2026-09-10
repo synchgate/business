@@ -52,6 +52,8 @@ export type SalePeriod = "today" | "week" | "month" | "year";
 
 export interface SaleListFilters {
   period?: SalePeriod;
+  date?: string;
+  search?: string;
   page?: number;
 }
 
@@ -66,6 +68,8 @@ export interface SaleListEntry {
 export interface SaleDetail extends SaleListEntry {
   items: SaleItem[];
   recorded_by_name: string | null;
+  merchant_name: string;
+  merchant_logo: string | null;
 }
 
 export interface SaleItemInput {

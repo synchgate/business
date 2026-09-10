@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { Download, Minus, Plus, Printer, ShoppingCart, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,6 +11,7 @@ import { CustomItemDialog } from "@/features/pos/custom-item-dialog";
 import { PosTabs } from "@/features/pos/pos-tabs";
 import { useCreateSale, useTodaySalesSummary } from "@/hooks/use-pos";
 import { findProductByBarcode } from "@/api/endpoints/pos";
+import { downloadSaleReceiptPdf, printSaleReceipt } from "@/lib/sale-receipt";
 import { formatMoney } from "@/lib/format";
 import { toast } from "@/components/ui/toaster";
 import { readErrorMessage } from "@/api/envelope";
@@ -138,6 +139,21 @@ export function CheckoutPage() {
                   <span className="font-ledger text-[var(--color-body)]">{formatMoney(item.amount)}</span>
                 </div>
               ))}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="secondary" className="flex-1" onClick={() => printSaleReceipt(receipt)}>
+                <Printer className="size-4" />
+                Print
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="flex-1"
+                onClick={() => downloadSaleReceiptPdf(receipt)}
+              >
+                <Download className="size-4" />
+                Download PDF
+              </Button>
             </div>
             <Button className="w-full" onClick={startNewSale}>
               New sale
