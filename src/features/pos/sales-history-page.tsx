@@ -99,26 +99,28 @@ export function SalesHistoryPage() {
         </div>
       </div>
 
-      <div className="inline-flex h-9 items-center gap-1 rounded-[var(--radius-card)] bg-[var(--color-surface-muted)] p-1">
-        {PERIODS.map((p) => (
-          <button
-            key={p.value}
-            type="button"
-            onClick={() => changePeriod(p.value)}
-            className={cn(
-              "inline-flex h-7 items-center rounded-[var(--radius-chip)] px-3 text-sm font-medium transition-colors",
-              period === p.value
-                ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm"
-                : "text-[var(--color-body)] hover:text-[var(--color-ink)]",
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="inline-flex h-9 items-center gap-1 rounded-[var(--radius-card)] bg-[var(--color-surface-muted)] p-1">
+          {PERIODS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => changePeriod(p.value)}
+              className={cn(
+                "inline-flex h-7 shrink-0 items-center rounded-[var(--radius-chip)] px-3 text-sm font-medium transition-colors",
+                period === p.value
+                  ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm"
+                  : "text-[var(--color-body)] hover:text-[var(--color-ink)]",
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative w-full max-w-xs">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-muted)]" />
           <Input
             placeholder="Search by sale ref or payment method"
@@ -137,18 +139,20 @@ export function SalesHistoryPage() {
             </button>
           )}
         </div>
-        <Input
-          type="date"
-          value={date}
-          onChange={(e) => changeDate(e.target.value)}
-          className="w-auto"
-          aria-label="Filter by date"
-        />
-        {date && (
-          <Button variant="secondary" size="sm" onClick={() => changeDate("")}>
-            Clear date
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <Input
+            type="date"
+            value={date}
+            onChange={(e) => changeDate(e.target.value)}
+            className="w-full sm:w-auto"
+            aria-label="Filter by date"
+          />
+          {date && (
+            <Button variant="secondary" size="sm" className="shrink-0" onClick={() => changeDate("")}>
+              Clear date
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -173,48 +177,88 @@ export function SalesHistoryPage() {
             />
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sale</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead>Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sales.map((sale) => (
-                    <TableRow
-                      key={sale.id}
-                      className="cursor-pointer"
-                      onClick={() => setSelectedSale(sale)}
-                    >
-                      <TableCell className="font-medium text-[var(--color-ink)]">
-                        <div className="flex items-center gap-2">
-                          {sale.sale_number}
-                          {isPendingSale(sale) && (
-                            <span
-                              className={cn(
-                                "rounded-[var(--radius-chip)] px-1.5 py-0.5 text-[10px] font-medium",
-                                sale.sync_status === "failed"
-                                  ? "bg-[color-mix(in_srgb,var(--color-status-overdue)_14%,transparent)] text-[var(--color-status-overdue)]"
-                                  : "bg-[var(--color-primary-soft)] text-[var(--color-primary)]",
-                              )}
-                            >
-                              {sale.sync_status === "failed" ? "Sync failed" : "Pending sync"}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-[var(--color-body)]">{formatDateTime(sale.created_at)}</TableCell>
-                      <TableCell className="capitalize text-[var(--color-body)]">{sale.payment_method}</TableCell>
-                      <TableCell className="font-ledger text-[var(--color-ink)]">
-                        {formatMoney(sale.total_amount)}
-                      </TableCell>
+              {/* Desktop table */}
+              <div className="hidden sm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Sale</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead>Total</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {sales.map((sale) => (
+                      <TableRow
+                        key={sale.id}
+                        className="cursor-pointer"
+                        onClick={() => setSelectedSale(sale)}
+                      >
+                        <TableCell className="font-medium text-[var(--color-ink)]">
+                          <div className="flex items-center gap-2">
+                            {sale.sale_number}
+                            {isPendingSale(sale) && (
+                              <span
+                                className={cn(
+                                  "rounded-[var(--radius-chip)] px-1.5 py-0.5 text-[10px] font-medium",
+                                  sale.sync_status === "failed"
+                                    ? "bg-[color-mix(in_srgb,var(--color-status-overdue)_14%,transparent)] text-[var(--color-status-overdue)]"
+                                    : "bg-[var(--color-primary-soft)] text-[var(--color-primary)]",
+                                )}
+                              >
+                                {sale.sync_status === "failed" ? "Sync failed" : "Pending sync"}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-[var(--color-body)]">{formatDateTime(sale.created_at)}</TableCell>
+                        <TableCell className="capitalize text-[var(--color-body)]">{sale.payment_method}</TableCell>
+                        <TableCell className="font-ledger text-[var(--color-ink)]">
+                          {formatMoney(sale.total_amount)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="divide-y divide-[var(--color-line)] sm:hidden">
+                {sales.map((sale) => (
+                  <button
+                    key={sale.id}
+                    type="button"
+                    onClick={() => setSelectedSale(sale)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors active:bg-[var(--color-surface-muted)]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium text-[var(--color-ink)]">{sale.sale_number}</p>
+                        {isPendingSale(sale) && (
+                          <span
+                            className={cn(
+                              "shrink-0 rounded-[var(--radius-chip)] px-1.5 py-0.5 text-[10px] font-medium",
+                              sale.sync_status === "failed"
+                                ? "bg-[color-mix(in_srgb,var(--color-status-overdue)_14%,transparent)] text-[var(--color-status-overdue)]"
+                                : "bg-[var(--color-primary-soft)] text-[var(--color-primary)]",
+                            )}
+                          >
+                            {sale.sync_status === "failed" ? "Sync failed" : "Pending sync"}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[var(--color-muted)]">{formatDateTime(sale.created_at)}</p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-0.5">
+                      <span className="font-ledger text-sm font-medium text-[var(--color-ink)]">
+                        {formatMoney(sale.total_amount)}
+                      </span>
+                      <span className="text-xs capitalize text-[var(--color-muted)]">{sale.payment_method}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
 
               <div className="flex items-center justify-between border-t border-[var(--color-line)] px-4 py-3 sm:px-5">
                 <p className="text-xs text-[var(--color-muted)]">

@@ -91,47 +91,93 @@ export function ProductListPage() {
               action={!search ? { label: "Add product", onClick: openCreate } : undefined}
             />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop table */}
+              <div className="hidden sm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {products.map((p) => (
+                      <TableRow
+                        key={p.id}
+                        className={cn(canManage && "cursor-pointer")}
+                        onClick={() => openEdit(p)}
+                      >
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-[var(--color-ink)]">{p.name}</p>
+                            {p.barcode && <p className="text-xs text-[var(--color-muted)]">{p.barcode}</p>}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-[var(--color-body)]">
+                          {p.category ? <Badge>{p.category.name}</Badge> : "—"}
+                        </TableCell>
+                        <TableCell className="text-[var(--color-body)]">{formatMoney(p.price)}</TableCell>
+                        <TableCell className={p.stock_quantity < 0 ? "text-[var(--color-status-overdue)]" : "text-[var(--color-body)]"}>
+                          {p.stock_quantity}
+                        </TableCell>
+                        <TableCell>
+                          {p.is_active ? (
+                            <span className="text-xs font-medium text-[var(--color-status-paid)]">Active</span>
+                          ) : (
+                            <span className="text-xs font-medium text-[var(--color-muted)]">Inactive</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="divide-y divide-[var(--color-line)] sm:hidden">
                 {products.map((p) => (
-                  <TableRow
+                  <div
                     key={p.id}
-                    className={cn(canManage && "cursor-pointer")}
+                    role={canManage ? "button" : undefined}
                     onClick={() => openEdit(p)}
+                    className={cn(
+                      "flex items-center justify-between gap-3 px-4 py-3.5",
+                      canManage && "active:bg-[var(--color-surface-muted)]",
+                    )}
                   >
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-[var(--color-ink)]">{p.name}</p>
-                        {p.barcode && <p className="text-xs text-[var(--color-muted)]">{p.barcode}</p>}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-[var(--color-ink)]">{p.name}</p>
+                      {p.barcode && <p className="truncate text-xs text-[var(--color-muted)]">{p.barcode}</p>}
+                      <div className="mt-1 flex items-center gap-2">
+                        {p.category && <Badge>{p.category.name}</Badge>}
+                        {p.is_active ? (
+                          <span className="text-xs font-medium text-[var(--color-status-paid)]">Active</span>
+                        ) : (
+                          <span className="text-xs font-medium text-[var(--color-muted)]">Inactive</span>
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-[var(--color-body)]">
-                      {p.category ? <Badge>{p.category.name}</Badge> : "—"}
-                    </TableCell>
-                    <TableCell className="text-[var(--color-body)]">{formatMoney(p.price)}</TableCell>
-                    <TableCell className={p.stock_quantity < 0 ? "text-[var(--color-status-overdue)]" : "text-[var(--color-body)]"}>
-                      {p.stock_quantity}
-                    </TableCell>
-                    <TableCell>
-                      {p.is_active ? (
-                        <span className="text-xs font-medium text-[var(--color-status-paid)]">Active</span>
-                      ) : (
-                        <span className="text-xs font-medium text-[var(--color-muted)]">Inactive</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className="font-ledger text-sm font-medium text-[var(--color-ink)]">
+                        {formatMoney(p.price)}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-xs",
+                          p.stock_quantity < 0 ? "text-[var(--color-status-overdue)]" : "text-[var(--color-muted)]",
+                        )}
+                      >
+                        {p.stock_quantity} in stock
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

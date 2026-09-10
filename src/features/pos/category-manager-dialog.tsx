@@ -123,7 +123,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: { open: boolean; o
                         <button
                           type="button"
                           onClick={() => handleRename(c.id)}
-                          className="text-[var(--color-status-paid)] hover:opacity-80"
+                          className="p-1.5 text-[var(--color-status-paid)] hover:opacity-80"
                           aria-label="Save"
                         >
                           <Check className="size-4" />
@@ -131,7 +131,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: { open: boolean; o
                         <button
                           type="button"
                           onClick={cancelEditing}
-                          className="text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                          className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                           aria-label="Cancel"
                         >
                           <X className="size-4" />
@@ -141,11 +141,11 @@ export function CategoryManagerDialog({ open, onOpenChange }: { open: boolean; o
                   ) : (
                     <>
                       <span className="truncate text-[var(--color-ink)]">{c.name}</span>
-                      <div className="flex shrink-0 gap-2">
+                      <div className="flex shrink-0 gap-1">
                         <button
                           type="button"
                           onClick={() => startEditing(c.id, c.name)}
-                          className="text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+                          className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)]"
                           aria-label={`Rename ${c.name}`}
                         >
                           <Pencil className="size-4" />
@@ -153,7 +153,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: { open: boolean; o
                         <button
                           type="button"
                           onClick={() => handleDelete(c.id)}
-                          className="text-[var(--color-muted)] hover:text-[var(--color-status-overdue)]"
+                          className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-status-overdue)]"
                           aria-label={`Delete ${c.name}`}
                         >
                           <Trash2 className="size-4" />

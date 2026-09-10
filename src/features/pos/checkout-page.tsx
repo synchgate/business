@@ -232,13 +232,15 @@ export function CheckoutPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <ProductSearch onSelect={addProductToCart} />
-        <BarcodeScanner triggerLabel={lookingUp ? "Looking up…" : "Scan item"} onScan={handleScan} />
-        <Button type="button" variant="secondary" onClick={() => setShowCustomItem(true)}>
-          <Plus className="size-4" />
-          Custom item
-        </Button>
+        <div className="flex gap-2">
+          <BarcodeScanner triggerLabel={lookingUp ? "Looking up…" : "Scan item"} onScan={handleScan} />
+          <Button type="button" variant="secondary" className="flex-1 sm:flex-initial" onClick={() => setShowCustomItem(true)}>
+            <Plus className="size-4" />
+            Custom item
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -250,61 +252,114 @@ export function CheckoutPage() {
               description="Scan a barcode or add a custom item to start this sale."
             />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Qty</TableHead>
-                  <TableHead>Unit price</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop table */}
+              <div className="hidden sm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item</TableHead>
+                      <TableHead>Qty</TableHead>
+                      <TableHead>Unit price</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {cart.map((line) => (
+                      <TableRow key={line.key}>
+                        <TableCell className="text-[var(--color-ink)]">{line.item_name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(line.key, -1)}
+                              className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus className="size-3.5" />
+                            </button>
+                            <span className="w-6 text-center font-ledger text-sm">{line.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(line.key, 1)}
+                              className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                              aria-label="Increase quantity"
+                            >
+                              <Plus className="size-3.5" />
+                            </button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-ledger text-sm text-[var(--color-body)]">
+                          {formatMoney(line.unit_price)}
+                        </TableCell>
+                        <TableCell className="font-ledger text-sm text-[var(--color-ink)]">
+                          {formatMoney(line.unit_price * line.quantity)}
+                        </TableCell>
+                        <TableCell>
+                          <button
+                            type="button"
+                            onClick={() => removeLine(line.key)}
+                            className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-status-overdue)]"
+                            aria-label={`Remove ${line.item_name}`}
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile cards — a 5-column table is unusable at phone width,
+                  so each line gets its own row with big tap targets for the
+                  register's most-repeated action (adjusting quantity). */}
+              <div className="divide-y divide-[var(--color-line)] sm:hidden">
                 {cart.map((line) => (
-                  <TableRow key={line.key}>
-                    <TableCell className="text-[var(--color-ink)]">{line.item_name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(line.key, -1)}
-                          className="text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus className="size-3.5" />
-                        </button>
-                        <span className="w-6 text-center font-ledger text-sm">{line.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(line.key, 1)}
-                          className="text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus className="size-3.5" />
-                        </button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-ledger text-sm text-[var(--color-body)]">
-                      {formatMoney(line.unit_price)}
-                    </TableCell>
-                    <TableCell className="font-ledger text-sm text-[var(--color-ink)]">
-                      {formatMoney(line.unit_price * line.quantity)}
-                    </TableCell>
-                    <TableCell>
+                  <div key={line.key} className="flex items-center gap-3 px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-[var(--color-ink)]">{line.item_name}</p>
+                      <p className="font-ledger text-xs text-[var(--color-muted)]">
+                        {formatMoney(line.unit_price)} each
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(line.key, -1)}
+                        className="flex size-9 items-center justify-center rounded-[var(--radius-chip)] border border-[var(--color-line)] text-[var(--color-body)] active:bg-[var(--color-surface-muted)]"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="size-4" />
+                      </button>
+                      <span className="w-7 text-center font-ledger text-sm">{line.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(line.key, 1)}
+                        className="flex size-9 items-center justify-center rounded-[var(--radius-chip)] border border-[var(--color-line)] text-[var(--color-body)] active:bg-[var(--color-surface-muted)]"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus className="size-4" />
+                      </button>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className="font-ledger text-sm font-medium text-[var(--color-ink)]">
+                        {formatMoney(line.unit_price * line.quantity)}
+                      </span>
                       <button
                         type="button"
                         onClick={() => removeLine(line.key)}
-                        className="text-[var(--color-muted)] hover:text-[var(--color-status-overdue)]"
+                        className="p-1 text-[var(--color-muted)] active:text-[var(--color-status-overdue)]"
                         aria-label={`Remove ${line.item_name}`}
                       >
                         <Trash2 className="size-4" />
                       </button>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
