@@ -51,6 +51,10 @@ export function findCachedProductByBarcode(barcode: string): ProductListEntry | 
   return getCachedProducts().find((p) => p.barcode === barcode) ?? null;
 }
 
+export function findCachedProductById(id: string): ProductListEntry | null {
+  return getCachedProducts().find((p) => p.id === id) ?? null;
+}
+
 export function searchCachedProducts(query: string, limit = 20): ProductListEntry[] {
   const needle = query.trim().toLowerCase();
   if (!needle) return [];
@@ -74,6 +78,12 @@ export function enqueuePendingSale(sale: PendingSale): void {
 
 export function removePendingSale(id: string): void {
   const queue = getPendingSales().filter((s) => s.id !== id);
+  writeJson(PENDING_SALES_KEY, queue);
+  notifyChange();
+}
+
+export function updatePendingSale(id: string, updates: Partial<PendingSale>): void {
+  const queue = getPendingSales().map((s) => (s.id === id ? { ...s, ...updates } : s));
   writeJson(PENDING_SALES_KEY, queue);
   notifyChange();
 }

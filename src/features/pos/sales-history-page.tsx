@@ -13,9 +13,14 @@ import { useSaleList, useSaleDetail, useTodaySalesSummary } from "@/hooks/use-po
 import { usePendingSales } from "@/hooks/use-pending-sales";
 import { formatMoney, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { pendingSalesMatchingFilters } from "@/lib/pos-sync";
+import { pendingSalesMatchingFilters, syncPendingSales } from "@/lib/pos-sync";
+import { removePendingSale } from "@/lib/offline-store";
 import { downloadSaleReceiptPdf, printSaleReceipt } from "@/lib/sale-receipt";
 import type { PendingSale, SaleDetail, SaleListEntry, SalePeriod } from "@/types/pos";
+
+function isPendingSale(sale: SaleListEntry | SaleDetail | PendingSale): sale is PendingSale {
+  return "sync_status" in sale;
+}
 
 const PERIODS: { value: SalePeriod; label: string }[] = [
   { value: "today", label: "Today" },
@@ -187,9 +192,16 @@ export function SalesHistoryPage() {
                       <TableCell className="font-medium text-[var(--color-ink)]">
                         <div className="flex items-center gap-2">
                           {sale.sale_number}
-                          {"sync_status" in sale && (
-                            <span className="rounded-[var(--radius-chip)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-primary)]">
-                              Pending sync
+                          {isPendingSale(sale) && (
+                            <span
+                              className={cn(
+                                "rounded-[var(--radius-chip)] px-1.5 py-0.5 text-[10px] font-medium",
+                                sale.sync_status === "failed"
+                                  ? "bg-[color-mix(in_srgb,var(--color-status-overdue)_14%,transparent)] text-[var(--color-status-overdue)]"
+                                  : "bg-[var(--color-primary-soft)] text-[var(--color-primary)]",
+                              )}
+                            >
+                              {sale.sync_status === "failed" ? "Sync failed" : "Pending sync"}
                             </span>
                           )}
                         </div>
@@ -248,7 +260,7 @@ function SaleDetailDialog({
   sale: SaleListEntry | PendingSale | null;
   onOpenChange: (open: boolean) => void;
 }) {
-  const isPending = !!sale && "sync_status" in sale;
+  const isPending = !!sale && isPendingSale(sale);
   const { data: fetched, isLoading } = useSaleDetail(!isPending && sale ? sale.id : undefined);
   const detail: SaleDetail | PendingSale | undefined = isPending ? (sale as PendingSale) : fetched;
 
@@ -277,9 +289,14 @@ function SaleDetailDialog({
               {detail.recorded_by_name && (
                 <p className="text-xs text-[var(--color-muted)]">Recorded by {detail.recorded_by_name}</p>
               )}
-              {"sync_status" in detail && (
+              {isPendingSale(detail) && detail.sync_status === "pending" && (
                 <p className="mt-2 text-xs font-medium text-[var(--color-primary)]">
                   Pending sync — will upload automatically when you're back online.
+                </p>
+              )}
+              {isPendingSale(detail) && detail.sync_status === "failed" && (
+                <p className="mt-2 text-xs font-medium text-[var(--color-status-overdue)]">
+                  Couldn't sync: {detail.sync_error}
                 </p>
               )}
             </div>
@@ -313,6 +330,24 @@ function SaleDetailDialog({
                 Download PDF
               </Button>
             </div>
+            {isPendingSale(detail) && detail.sync_status === "failed" && (
+              <div className="flex gap-2">
+                <Button type="button" variant="secondary" className="flex-1" onClick={() => syncPendingSales()}>
+                  Retry sync
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="flex-1 text-[var(--color-status-overdue)]"
+                  onClick={() => {
+                    removePendingSale(detail.id);
+                    onOpenChange(false);
+                  }}
+                >
+                  Discard
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>

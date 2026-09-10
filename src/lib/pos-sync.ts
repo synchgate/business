@@ -5,7 +5,8 @@
 // correctly into whatever filter Sales History has active.
 
 import { createSale } from "@/api/endpoints/pos";
-import { getPendingSales, removePendingSale } from "@/lib/offline-store";
+import { readErrorMessage } from "@/api/envelope";
+import { getPendingSales, removePendingSale, updatePendingSale } from "@/lib/offline-store";
 import { queryClient } from "@/lib/query-client";
 import type { PaymentMethod, PendingSale, SaleItem, SalePeriod } from "@/types/pos";
 
@@ -73,7 +74,15 @@ export async function syncPendingSales(): Promise<{ synced: number }> {
       synced++;
     } catch (err) {
       if (isNetworkError(err)) break; // still offline — stop, try again next time
-      // Any other error: leave it queued rather than silently dropping the sale.
+      // A real validation error (e.g. the item was oversold by another
+      // register while this one was offline) — retrying won't fix itself,
+      // so mark it failed instead of silently retrying forever. Stays
+      // visible in Sales History / PosSyncStatus for the cashier to resolve.
+      const message = readErrorMessage(
+        (err as { response?: { data?: unknown } })?.response?.data,
+        "Couldn't sync this sale.",
+      );
+      updatePendingSale(sale.id, { sync_status: "failed", sync_error: message });
     }
   }
 

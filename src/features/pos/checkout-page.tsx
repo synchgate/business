@@ -13,7 +13,7 @@ import { PosSyncStatus } from "@/features/pos/pos-sync-status";
 import { useCreateSale, useProductList, useTodaySalesSummary } from "@/hooks/use-pos";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { findProductByBarcode } from "@/api/endpoints/pos";
-import { cacheProducts, enqueuePendingSale, findCachedProductByBarcode } from "@/lib/offline-store";
+import { cacheProducts, enqueuePendingSale, findCachedProductByBarcode, findCachedProductById } from "@/lib/offline-store";
 import { buildPendingSale, isNetworkError } from "@/lib/pos-sync";
 import { downloadSaleReceiptPdf, printSaleReceipt } from "@/lib/sale-receipt";
 import { formatMoney } from "@/lib/format";
@@ -65,6 +65,11 @@ export function CheckoutPage() {
   }
 
   function addProductToCart(product: ProductListEntry | ProductDetail) {
+    const alreadyInCart = cart.find((l) => l.product_id === product.id)?.quantity ?? 0;
+    if (alreadyInCart + 1 > product.stock_quantity) {
+      toast.error(`Only ${Math.max(product.stock_quantity, 0)} "${product.name}" left in stock.`);
+      return;
+    }
     addToCart({ product_id: product.id, item_name: product.name, unit_price: Number(product.price), quantity: 1 });
   }
 
@@ -101,6 +106,14 @@ export function CheckoutPage() {
   }
 
   function updateQuantity(key: string, delta: number) {
+    if (delta > 0) {
+      const line = cart.find((l) => l.key === key);
+      const product = line?.product_id ? findCachedProductById(line.product_id) : null;
+      if (line && product && line.quantity + delta > product.stock_quantity) {
+        toast.error(`Only ${Math.max(product.stock_quantity, 0)} "${product.name}" left in stock.`);
+        return;
+      }
+    }
     setCart((prev) =>
       prev.map((l) => (l.key === key ? { ...l, quantity: l.quantity + delta } : l)).filter((l) => l.quantity > 0),
     );

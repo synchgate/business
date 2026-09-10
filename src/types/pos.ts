@@ -99,5 +99,7 @@ export interface TodaySalesSummary {
  * collide with a real one once synced.
  */
 export interface PendingSale extends SaleDetail {
-  sync_status: "pending";
+  sync_status: "pending" | "failed";
+  /** Set when sync_status is "failed" — e.g. the item was oversold while offline. */
+  sync_error?: string;
 }
