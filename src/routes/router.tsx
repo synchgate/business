@@ -41,6 +41,10 @@ const PayrollRunListPage    = lazy(() => import("@/features/payroll/payroll-run-
 const PayrollRunDetailPage  = lazy(() => import("@/features/payroll/payroll-run-detail-page").then((m) => ({ default: m.PayrollRunDetailPage })));
 const SalaryAdvancesPage    = lazy(() => import("@/features/payroll/salary-advances-page").then((m) => ({ default: m.SalaryAdvancesPage })));
 
+// POS
+const ProductListPage = lazy(() => import("@/features/pos/product-list-page").then((m) => ({ default: m.ProductListPage })));
+const CheckoutPage    = lazy(() => import("@/features/pos/checkout-page").then((m) => ({ default: m.CheckoutPage })));
+
 // Compliance
 const CompliancePage = lazy(() => import("@/features/compliance/compliance-page").then((m) => ({ default: m.CompliancePage })));
 
@@ -135,6 +139,10 @@ export const router = createBrowserRouter([
               { path: "/payroll/runs",          element: wrap(<RequireSubscription><PayrollRunListPage /></RequireSubscription>), handle: { title: "Payroll runs" } },
               { path: "/payroll/runs/:id",      element: wrap(<RequireSubscription><PayrollRunDetailPage /></RequireSubscription>), handle: { title: "Payroll run" } },
               { path: "/payroll/advances",      element: wrap(<RequireSubscription><SalaryAdvancesPage /></RequireSubscription>), handle: { title: "Salary advances" } },
+
+              // POS — not subscription-gated
+              { path: "/pos/products", element: wrap(<ProductListPage />), handle: { title: "Products" } },
+              { path: "/pos/checkout", element: wrap(<CheckoutPage />),    handle: { title: "Checkout" } },
 
               // Compliance
               { path: "/compliance", element: wrap(<CompliancePage />), handle: { title: "Tax & Compliance" } },
