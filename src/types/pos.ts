@@ -115,7 +115,11 @@ export interface PosDailySales {
 }
 
 export interface PosAnalytics {
-  period: SalePeriod;
+  period: SalePeriod | null;
+  date_from: string;
+  date_to: string;
+  merchant_name: string;
+  merchant_logo: string | null;
   total_sales: number;
   total_revenue: string;
   average_sale_value: string;

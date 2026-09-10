@@ -120,3 +120,26 @@ export async function getPosAnalytics(period: SalePeriod = "today") {
   });
   return data.data;
 }
+
+export async function getPosAnalyticsForRange(dateFrom: string, dateTo: string) {
+  const { data } = await apiClient.get<ApiSuccessEnvelope<PosAnalytics>>("pos/sales/analytics/", {
+    params: { date_from: dateFrom, date_to: dateTo },
+  });
+  return data.data;
+}
+
+/** Triggers a browser download — not wrapped in useQuery, this is a one-off action. */
+export async function downloadPosSalesExport(dateFrom: string, dateTo: string, format: "csv" | "xlsx" = "csv") {
+  const response = await apiClient.get("pos/sales/export/", {
+    params: { date_from: dateFrom, date_to: dateTo, format },
+    responseType: "blob",
+  });
+  const url = URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `sales-report-${dateFrom}-to-${dateTo}.${format}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}

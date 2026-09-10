@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, ArrowRight, Package, Receipt, TrendingUp, Wallet } from "lucide-react";
+import { AlertTriangle, ArrowRight, FileDown, Package, Receipt, TrendingUp, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -11,12 +11,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PosTabs } from "@/features/pos/pos-tabs";
 import { PosSyncStatus } from "@/features/pos/pos-sync-status";
 import { PeriodTabs } from "@/features/pos/period-tabs";
+import { GenerateReportDialog } from "@/features/pos/generate-report-dialog";
 import { usePosAnalytics, useSaleList } from "@/hooks/use-pos";
 import { formatMoney, formatDateTime } from "@/lib/format";
 import type { SalePeriod } from "@/types/pos";
 
 export function PosDashboardPage() {
   const [period, setPeriod] = useState<SalePeriod>("today");
+  const [showReportDialog, setShowReportDialog] = useState(false);
   const { data: analytics, isLoading, isError, refetch } = usePosAnalytics(period);
   const { data: recentSales, isLoading: recentLoading } = useSaleList({ period, page: 1 });
 
@@ -28,9 +30,15 @@ export function PosDashboardPage() {
       <PosTabs />
       <PosSyncStatus />
 
-      <div>
-        <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">Dashboard</h2>
-        <p className="text-sm text-[var(--color-body)]">Your point-of-sale activity at a glance.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">Dashboard</h2>
+          <p className="text-sm text-[var(--color-body)]">Your point-of-sale activity at a glance.</p>
+        </div>
+        <Button variant="secondary" onClick={() => setShowReportDialog(true)}>
+          <FileDown className="size-4" />
+          Generate report
+        </Button>
       </div>
 
       <PeriodTabs period={period} onChange={setPeriod} />
@@ -225,6 +233,8 @@ export function PosDashboardPage() {
           </Card>
         </>
       )}
+
+      <GenerateReportDialog open={showReportDialog} onOpenChange={setShowReportDialog} />
     </div>
   );
 }
