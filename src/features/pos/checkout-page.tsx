@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, Minus, Plus, Printer, ShoppingCart, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,17 @@ import { ProductSearch } from "@/features/pos/product-search";
 import { QuickAddProductDialog } from "@/features/pos/quick-add-dialog";
 import { CustomItemDialog } from "@/features/pos/custom-item-dialog";
 import { PosTabs } from "@/features/pos/pos-tabs";
-import { useCreateSale, useTodaySalesSummary } from "@/hooks/use-pos";
+import { PosSyncStatus } from "@/features/pos/pos-sync-status";
+import { useCreateSale, useProductList, useTodaySalesSummary } from "@/hooks/use-pos";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { findProductByBarcode } from "@/api/endpoints/pos";
+import { cacheProducts, enqueuePendingSale, findCachedProductByBarcode } from "@/lib/offline-store";
+import { buildPendingSale, isNetworkError } from "@/lib/pos-sync";
 import { downloadSaleReceiptPdf, printSaleReceipt } from "@/lib/sale-receipt";
 import { formatMoney } from "@/lib/format";
 import { toast } from "@/components/ui/toaster";
 import { readErrorMessage } from "@/api/envelope";
-import type { PaymentMethod, ProductDetail, ProductListEntry, SaleDetail } from "@/types/pos";
+import type { PaymentMethod, PendingSale, ProductDetail, ProductListEntry, SaleDetail } from "@/types/pos";
 
 interface CartLine {
   key: string;
@@ -31,10 +35,18 @@ export function CheckoutPage() {
   const [pendingBarcode, setPendingBarcode] = useState<string | null>(null);
   const [showCustomItem, setShowCustomItem] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
-  const [receipt, setReceipt] = useState<SaleDetail | null>(null);
+  const [receipt, setReceipt] = useState<SaleDetail | PendingSale | null>(null);
 
   const createSale = useCreateSale();
   const { data: todaySummary } = useTodaySalesSummary();
+  const online = useOnlineStatus();
+
+  // Full active-catalog snapshot for offline barcode/search lookups (see
+  // offline-store.ts) — refreshed silently whenever this succeeds online.
+  const { data: catalogSnapshot } = useProductList({ is_active: true });
+  useEffect(() => {
+    if (catalogSnapshot) cacheProducts(catalogSnapshot);
+  }, [catalogSnapshot]);
 
   const total = cart.reduce((sum, line) => sum + line.unit_price * line.quantity, 0);
 
@@ -59,14 +71,25 @@ export function CheckoutPage() {
   async function handleScan(barcode: string) {
     setLookingUp(true);
     try {
-      const product = await findProductByBarcode(barcode);
+      const product = online ? await findProductByBarcode(barcode) : findCachedProductByBarcode(barcode);
       if (product) {
         addProductToCart(product);
-      } else {
+      } else if (online) {
         setPendingBarcode(barcode);
+      } else {
+        toast.error("Not found in the cached catalog. Add it as a custom item instead.");
       }
-    } catch {
-      toast.error("Couldn't look up that barcode. Check your connection and try again.");
+    } catch (err) {
+      if (isNetworkError(err)) {
+        const cached = findCachedProductByBarcode(barcode);
+        if (cached) {
+          addProductToCart(cached);
+        } else {
+          toast.error("Not found in the cached catalog. Add it as a custom item instead.");
+        }
+      } else {
+        toast.error("Couldn't look up that barcode. Check your connection and try again.");
+      }
     } finally {
       setLookingUp(false);
     }
@@ -103,6 +126,13 @@ export function CheckoutPage() {
       setReceipt(sale);
       setCart([]);
     } catch (err) {
+      if (isNetworkError(err) || !online) {
+        const pendingSale = buildPendingSale(cart, paymentMethod);
+        enqueuePendingSale(pendingSale);
+        setReceipt(pendingSale);
+        setCart([]);
+        return;
+      }
       toast.error(
         readErrorMessage((err as { response?: { data?: unknown } }).response?.data, "Couldn't complete the sale."),
       );
@@ -118,6 +148,7 @@ export function CheckoutPage() {
     return (
       <div className="mx-auto max-w-md space-y-4">
         <PosTabs />
+        <PosSyncStatus />
         <Card>
           <CardHeader>
             <CardTitle>Sale complete</CardTitle>
@@ -129,6 +160,11 @@ export function CheckoutPage() {
                 {formatMoney(receipt.total_amount)}
               </p>
               <p className="text-sm capitalize text-[var(--color-body)]">{receipt.payment_method}</p>
+              {"sync_status" in receipt && (
+                <p className="mt-2 text-xs font-medium text-[var(--color-primary)]">
+                  Pending sync — will upload automatically when you're back online.
+                </p>
+              )}
             </div>
             <div className="divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
               {receipt.items.map((item) => (
@@ -167,6 +203,7 @@ export function CheckoutPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <PosTabs />
+      <PosSyncStatus />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">Checkout</h2>

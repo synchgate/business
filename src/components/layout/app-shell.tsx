@@ -1,6 +1,7 @@
 import { Outlet, useMatches } from "react-router-dom";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
+import { PosSyncManager } from "@/features/pos/pos-sync-manager";
 
 export function AppShell() {
   const matches = useMatches();
@@ -9,6 +10,7 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-screen bg-[var(--color-canvas)]">
+      <PosSyncManager />
       <Sidebar />
       <div className="flex min-h-screen flex-1 flex-col min-w-0">
         <Topbar title={title} />

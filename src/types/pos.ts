@@ -89,3 +89,15 @@ export interface TodaySalesSummary {
   count: number;
   total: string;
 }
+
+/**
+ * A sale completed while offline, queued locally and not yet on the server.
+ * Shape-compatible with SaleDetail (same fields, `sync_status` added) so the
+ * receipt view, Sales History table, and print/PDF functions all accept one
+ * with zero special-casing. `sale_number` gets a "PENDING-" prefix instead
+ * of the server's "SALE-" so it's visibly distinguishable and can never
+ * collide with a real one once synced.
+ */
+export interface PendingSale extends SaleDetail {
+  sync_status: "pending";
+}

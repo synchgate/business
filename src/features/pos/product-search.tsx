@@ -2,27 +2,34 @@ import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useProductList } from "@/hooks/use-pos";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { searchCachedProducts } from "@/lib/offline-store";
 import { formatMoney } from "@/lib/format";
 import type { ProductListEntry } from "@/types/pos";
 
 /**
  * Fallback for the checkout screen when there's no barcode scanner (camera
  * or handheld) available — search the catalog by name and pick a result.
+ * Falls back to the locally cached catalog when offline (see
+ * checkout-page.tsx's catalog prefetch) instead of hitting the server.
  */
 export function ProductSearch({ onSelect }: { onSelect: (product: ProductListEntry) => void }) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const online = useOnlineStatus();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query.trim()), 250);
     return () => clearTimeout(timer);
   }, [query]);
 
-  const { data: results, isFetching } = useProductList(
+  const { data: onlineResults, isFetching } = useProductList(
     debouncedQuery ? { search: debouncedQuery, is_active: true } : {},
+    { enabled: online && !!debouncedQuery },
   );
+  const results = online ? onlineResults : searchCachedProducts(debouncedQuery);
   const showResults = open && debouncedQuery.length > 0;
 
   useEffect(() => {

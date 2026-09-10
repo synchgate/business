@@ -8,11 +8,14 @@ import { EmptyState, ErrorState } from "@/components/ui/state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PosTabs } from "@/features/pos/pos-tabs";
+import { PosSyncStatus } from "@/features/pos/pos-sync-status";
 import { useSaleList, useSaleDetail, useTodaySalesSummary } from "@/hooks/use-pos";
+import { usePendingSales } from "@/hooks/use-pending-sales";
 import { formatMoney, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { pendingSalesMatchingFilters } from "@/lib/pos-sync";
 import { downloadSaleReceiptPdf, printSaleReceipt } from "@/lib/sale-receipt";
-import type { SalePeriod } from "@/types/pos";
+import type { PendingSale, SaleDetail, SaleListEntry, SalePeriod } from "@/types/pos";
 
 const PERIODS: { value: SalePeriod; label: string }[] = [
   { value: "today", label: "Today" },
@@ -27,7 +30,7 @@ export function SalesHistoryPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [date, setDate] = useState("");
-  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
+  const [selectedSale, setSelectedSale] = useState<SaleListEntry | PendingSale | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -44,7 +47,20 @@ export function SalesHistoryPage() {
     date: date || undefined,
   });
   const { data: summary } = useTodaySalesSummary(period);
-  const sales = data?.results ?? [];
+  const pendingSales = usePendingSales();
+  const matchingPending = pendingSalesMatchingFilters(pendingSales, {
+    period,
+    date: date || undefined,
+    search: debouncedSearch || undefined,
+  });
+  // Pending sales are always "now" — only surface them on page 1, since
+  // they aren't part of the server's actual pagination.
+  const sales: (SaleListEntry | PendingSale)[] =
+    page === 1 ? [...matchingPending, ...(data?.results ?? [])] : (data?.results ?? []);
+
+  const pendingTotal = matchingPending.reduce((sum, s) => sum + Number(s.total_amount), 0);
+  const displayTotal = (Number(summary?.total ?? 0) + pendingTotal).toFixed(2);
+  const displayCount = (summary?.count ?? 0) + matchingPending.length;
 
   function changePeriod(next: SalePeriod) {
     setPeriod(next);
@@ -59,6 +75,7 @@ export function SalesHistoryPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <PosTabs />
+      <PosSyncStatus />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -70,7 +87,9 @@ export function SalesHistoryPage() {
             {PERIODS.find((p) => p.value === period)?.label}:{" "}
           </span>
           <span className="font-medium text-[var(--color-ink)]">
-            {summary ? `${formatMoney(summary.total)} · ${summary.count} sale${summary.count === 1 ? "" : "s"}` : "—"}
+            {summary
+              ? `${formatMoney(displayTotal)} · ${displayCount} sale${displayCount === 1 ? "" : "s"}`
+              : "—"}
           </span>
         </div>
       </div>
@@ -163,9 +182,18 @@ export function SalesHistoryPage() {
                     <TableRow
                       key={sale.id}
                       className="cursor-pointer"
-                      onClick={() => setSelectedSaleId(sale.id)}
+                      onClick={() => setSelectedSale(sale)}
                     >
-                      <TableCell className="font-medium text-[var(--color-ink)]">{sale.sale_number}</TableCell>
+                      <TableCell className="font-medium text-[var(--color-ink)]">
+                        <div className="flex items-center gap-2">
+                          {sale.sale_number}
+                          {"sync_status" in sale && (
+                            <span className="rounded-[var(--radius-chip)] bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-primary)]">
+                              Pending sync
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-[var(--color-body)]">{formatDateTime(sale.created_at)}</TableCell>
                       <TableCell className="capitalize text-[var(--color-body)]">{sale.payment_method}</TableCell>
                       <TableCell className="font-ledger text-[var(--color-ink)]">
@@ -177,7 +205,11 @@ export function SalesHistoryPage() {
               </Table>
 
               <div className="flex items-center justify-between border-t border-[var(--color-line)] px-4 py-3 sm:px-5">
-                <p className="text-xs text-[var(--color-muted)]">{data?.count ?? 0} sales</p>
+                <p className="text-xs text-[var(--color-muted)]">
+                  {data?.count ?? 0} sales
+                  {page === 1 && matchingPending.length > 0 &&
+                    ` · ${matchingPending.length} pending sync`}
+                </p>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="secondary"
@@ -204,28 +236,30 @@ export function SalesHistoryPage() {
         </CardContent>
       </Card>
 
-      <SaleDetailDialog saleId={selectedSaleId} onOpenChange={(open) => !open && setSelectedSaleId(null)} />
+      <SaleDetailDialog sale={selectedSale} onOpenChange={(open) => !open && setSelectedSale(null)} />
     </div>
   );
 }
 
 function SaleDetailDialog({
-  saleId,
+  sale,
   onOpenChange,
 }: {
-  saleId: string | null;
+  sale: SaleListEntry | PendingSale | null;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: sale, isLoading } = useSaleDetail(saleId ?? undefined);
+  const isPending = !!sale && "sync_status" in sale;
+  const { data: fetched, isLoading } = useSaleDetail(!isPending && sale ? sale.id : undefined);
+  const detail: SaleDetail | PendingSale | undefined = isPending ? (sale as PendingSale) : fetched;
 
   return (
-    <Dialog open={!!saleId} onOpenChange={onOpenChange}>
+    <Dialog open={!!sale} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{sale?.sale_number ?? "Sale details"}</DialogTitle>
+          <DialogTitle>{detail?.sale_number ?? "Sale details"}</DialogTitle>
         </DialogHeader>
 
-        {isLoading || !sale ? (
+        {isLoading || !detail ? (
           <div className="space-y-3">
             <Skeleton className="h-6 w-32" />
             <Skeleton className="h-24 w-full" />
@@ -234,18 +268,23 @@ function SaleDetailDialog({
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">
-                {formatDateTime(sale.created_at)}
+                {formatDateTime(detail.created_at)}
               </p>
               <p className="mt-1 font-ledger text-3xl font-semibold text-[var(--color-ink)]">
-                {formatMoney(sale.total_amount)}
+                {formatMoney(detail.total_amount)}
               </p>
-              <p className="text-sm capitalize text-[var(--color-body)]">{sale.payment_method}</p>
-              {sale.recorded_by_name && (
-                <p className="text-xs text-[var(--color-muted)]">Recorded by {sale.recorded_by_name}</p>
+              <p className="text-sm capitalize text-[var(--color-body)]">{detail.payment_method}</p>
+              {detail.recorded_by_name && (
+                <p className="text-xs text-[var(--color-muted)]">Recorded by {detail.recorded_by_name}</p>
+              )}
+              {"sync_status" in detail && (
+                <p className="mt-2 text-xs font-medium text-[var(--color-primary)]">
+                  Pending sync — will upload automatically when you're back online.
+                </p>
               )}
             </div>
             <div className="divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
-              {sale.items.map((item) => (
+              {detail.items.map((item) => (
                 <div key={item.id} className="flex justify-between py-2 text-sm">
                   <span className="text-[var(--color-ink)]">
                     {item.item_name} × {item.quantity}
@@ -259,7 +298,7 @@ function SaleDetailDialog({
                 type="button"
                 variant="secondary"
                 className="flex-1"
-                onClick={() => printSaleReceipt(sale)}
+                onClick={() => printSaleReceipt(detail)}
               >
                 <Printer className="size-4" />
                 Print
@@ -268,7 +307,7 @@ function SaleDetailDialog({
                 type="button"
                 variant="secondary"
                 className="flex-1"
-                onClick={() => downloadSaleReceiptPdf(sale)}
+                onClick={() => downloadSaleReceiptPdf(detail)}
               >
                 <Download className="size-4" />
                 Download PDF

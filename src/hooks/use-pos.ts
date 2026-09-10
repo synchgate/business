@@ -49,8 +49,12 @@ export function useDeleteCategory() {
 
 // ── Products ─────────────────────────────────────────────────────────
 
-export function useProductList(filters: ProductListFilters = {}) {
-  return useQuery({ queryKey: ["pos", "products", filters], queryFn: () => listProducts(filters) });
+export function useProductList(filters: ProductListFilters = {}, options: { enabled?: boolean } = {}) {
+  return useQuery({
+    queryKey: ["pos", "products", filters],
+    queryFn: () => listProducts(filters),
+    enabled: options.enabled,
+  });
 }
 
 export function useProductDetail(id: string | undefined) {
