@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { usePermission } from "@/hooks/use-team";
 
 const TABS = [
+  { to: "/pos/dashboard", label: "Dashboard", permission: "pos.view" },
   { to: "/pos/checkout", label: "Checkout", permission: "pos.sell" },
   { to: "/pos/products", label: "Products", permission: "pos.view" },
   { to: "/pos/sales", label: "Sales", permission: "pos.view" },

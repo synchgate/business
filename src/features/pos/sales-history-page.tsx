@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PosTabs } from "@/features/pos/pos-tabs";
 import { PosSyncStatus } from "@/features/pos/pos-sync-status";
+import { PeriodTabs, PERIODS } from "@/features/pos/period-tabs";
 import { useSaleList, useSaleDetail, useTodaySalesSummary } from "@/hooks/use-pos";
 import { usePendingSales } from "@/hooks/use-pending-sales";
 import { formatMoney, formatDateTime } from "@/lib/format";
@@ -21,13 +22,6 @@ import type { PendingSale, SaleDetail, SaleListEntry, SalePeriod } from "@/types
 function isPendingSale(sale: SaleListEntry | SaleDetail | PendingSale): sale is PendingSale {
   return "sync_status" in sale;
 }
-
-const PERIODS: { value: SalePeriod; label: string }[] = [
-  { value: "today", label: "Today" },
-  { value: "week", label: "This week" },
-  { value: "month", label: "This month" },
-  { value: "year", label: "This year" },
-];
 
 export function SalesHistoryPage() {
   const [period, setPeriod] = useState<SalePeriod>("today");
@@ -99,25 +93,7 @@ export function SalesHistoryPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="inline-flex h-9 items-center gap-1 rounded-[var(--radius-card)] bg-[var(--color-surface-muted)] p-1">
-          {PERIODS.map((p) => (
-            <button
-              key={p.value}
-              type="button"
-              onClick={() => changePeriod(p.value)}
-              className={cn(
-                "inline-flex h-7 shrink-0 items-center rounded-[var(--radius-chip)] px-3 text-sm font-medium transition-colors",
-                period === p.value
-                  ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm"
-                  : "text-[var(--color-body)] hover:text-[var(--color-ink)]",
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PeriodTabs period={period} onChange={changePeriod} />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="relative w-full sm:max-w-xs">

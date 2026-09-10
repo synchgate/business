@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { to: "/quotes",          label: "Quotations",      icon: ClipboardList,    permission: "invoicing.view" },
   { to: "/virtual-account", label: "Virtual Account", icon: Building2,        permission: "business.settings.view" },
   { to: "/customers",       label: "Customers",       icon: Users,            permission: "invoicing.view" },
-  { to: "/pos/products",    label: "Point of Sale",   icon: ShoppingCart,     permission: "pos.view" },
+  { to: "/pos/dashboard",   label: "Point of Sale",   icon: ShoppingCart,     permission: "pos.view" },
   { to: "/payroll/runs",    label: "Payroll",         icon: Wallet,           permission: "payroll.view" },
   { to: "/compliance",      label: "Tax & Compliance", icon: Landmark,        permission: "tax.view" },
   { to: "/team",            label: "Team",            icon: UserCog,          permission: "team.view" },

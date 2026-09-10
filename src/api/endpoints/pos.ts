@@ -3,6 +3,7 @@ import type { ApiSuccessEnvelope, PaginatedEnvelope } from "@/api/envelope";
 import type {
   Category,
   CategoryCreateInput,
+  PosAnalytics,
   ProductCreateInput,
   ProductDetail,
   ProductImportResult,
@@ -108,6 +109,13 @@ export async function createSale(input: SaleCreateInput) {
 
 export async function getTodaySalesSummary(period: SalePeriod = "today") {
   const { data } = await apiClient.get<ApiSuccessEnvelope<TodaySalesSummary>>("pos/sales/today-summary/", {
+    params: { period },
+  });
+  return data.data;
+}
+
+export async function getPosAnalytics(period: SalePeriod = "today") {
+  const { data } = await apiClient.get<ApiSuccessEnvelope<PosAnalytics>>("pos/sales/analytics/", {
     params: { period },
   });
   return data.data;

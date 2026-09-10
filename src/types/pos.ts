@@ -90,6 +90,42 @@ export interface TodaySalesSummary {
   total: string;
 }
 
+export interface PosTopProduct {
+  item_name: string;
+  quantity_sold: string;
+  revenue: string;
+}
+
+export interface PosPaymentBreakdownEntry {
+  payment_method: PaymentMethod;
+  count: number;
+  total: string;
+}
+
+export interface PosLowStockProduct {
+  id: string;
+  name: string;
+  stock_quantity: number;
+}
+
+export interface PosDailySales {
+  date: string;
+  total: string;
+  count: number;
+}
+
+export interface PosAnalytics {
+  period: SalePeriod;
+  total_sales: number;
+  total_revenue: string;
+  average_sale_value: string;
+  items_sold: string;
+  payment_breakdown: PosPaymentBreakdownEntry[];
+  top_products: PosTopProduct[];
+  low_stock_products: PosLowStockProduct[];
+  daily_sales: PosDailySales[];
+}
+
 /**
  * A sale completed while offline, queued locally and not yet on the server.
  * Shape-compatible with SaleDetail (same fields, `sync_status` added) so the

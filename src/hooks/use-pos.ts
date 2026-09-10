@@ -5,6 +5,7 @@ import {
   createSale,
   deactivateProduct,
   deleteCategory,
+  getPosAnalytics,
   getProduct,
   getSale,
   getTodaySalesSummary,
@@ -113,4 +114,11 @@ export function useTodaySalesSummary(period: SalePeriod = "today") {
 export function useCreateSale() {
   const invalidate = useInvalidate("pos");
   return useMutation({ mutationFn: (input: SaleCreateInput) => createSale(input), onSuccess: invalidate });
+}
+
+export function usePosAnalytics(period: SalePeriod = "today") {
+  return useQuery({
+    queryKey: ["pos", "sales", "analytics", period],
+    queryFn: () => getPosAnalytics(period),
+  });
 }
