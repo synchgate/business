@@ -48,6 +48,13 @@ export interface SaleItem {
   amount: string;
 }
 
+export type SalePeriod = "today" | "week" | "month" | "year";
+
+export interface SaleListFilters {
+  period?: SalePeriod;
+  page?: number;
+}
+
 export interface SaleListEntry {
   id: string;
   sale_number: string;

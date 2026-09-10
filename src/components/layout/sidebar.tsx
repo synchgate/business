@@ -11,7 +11,6 @@ import {
   Wallet,
   UserCog,
   Landmark,
-  ScanLine,
   ShoppingCart,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
@@ -26,8 +25,7 @@ const NAV_ITEMS = [
   { to: "/quotes",          label: "Quotations",      icon: ClipboardList,    permission: "invoicing.view" },
   { to: "/virtual-account", label: "Virtual Account", icon: Building2,        permission: "business.settings.view" },
   { to: "/customers",       label: "Customers",       icon: Users,            permission: "invoicing.view" },
-  { to: "/pos/checkout",    label: "Checkout",        icon: ShoppingCart,     permission: "pos.sell" },
-  { to: "/pos/products",    label: "Products",        icon: ScanLine,         permission: "pos.view" },
+  { to: "/pos/products",    label: "Point of Sale",   icon: ShoppingCart,     permission: "pos.view" },
   { to: "/payroll/runs",    label: "Payroll",         icon: Wallet,           permission: "payroll.view" },
   { to: "/compliance",      label: "Tax & Compliance", icon: Landmark,        permission: "tax.view" },
   { to: "/team",            label: "Team",            icon: UserCog,          permission: "team.view" },

@@ -1,5 +1,5 @@
 import { apiClient } from "@/api/client";
-import type { ApiSuccessEnvelope } from "@/api/envelope";
+import type { ApiSuccessEnvelope, PaginatedEnvelope } from "@/api/envelope";
 import type {
   Category,
   CategoryCreateInput,
@@ -10,6 +10,8 @@ import type {
   SaleCreateInput,
   SaleDetail,
   SaleListEntry,
+  SaleListFilters,
+  SalePeriod,
   TodaySalesSummary,
 } from "@/types/pos";
 
@@ -86,9 +88,12 @@ export async function importProducts(file: File) {
   return data.data;
 }
 
-export async function listSales() {
-  const { data } = await apiClient.get<ApiSuccessEnvelope<SaleListEntry[]>>("pos/sales/");
-  return data.data;
+/** Sales list is paginated (DRF's native envelope, like listInvoices — see api/envelope.ts). */
+export async function listSales(filters: SaleListFilters = {}) {
+  const { data } = await apiClient.get<PaginatedEnvelope<SaleListEntry>>("pos/sales/", {
+    params: filters,
+  });
+  return data;
 }
 
 export async function getSale(id: string) {
@@ -101,7 +106,9 @@ export async function createSale(input: SaleCreateInput) {
   return data.data;
 }
 
-export async function getTodaySalesSummary() {
-  const { data } = await apiClient.get<ApiSuccessEnvelope<TodaySalesSummary>>("pos/sales/today-summary/");
+export async function getTodaySalesSummary(period: SalePeriod = "today") {
+  const { data } = await apiClient.get<ApiSuccessEnvelope<TodaySalesSummary>>("pos/sales/today-summary/", {
+    params: { period },
+  });
   return data.data;
 }

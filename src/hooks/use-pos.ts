@@ -16,7 +16,7 @@ import {
   updateProduct,
   type ProductListFilters,
 } from "@/api/endpoints/pos";
-import type { CategoryCreateInput, ProductCreateInput, SaleCreateInput } from "@/types/pos";
+import type { CategoryCreateInput, ProductCreateInput, SaleCreateInput, SaleListFilters, SalePeriod } from "@/types/pos";
 
 function useInvalidate(key: string) {
   const queryClient = useQueryClient();
@@ -86,8 +86,8 @@ export function useImportProducts() {
 
 // ── Sales ────────────────────────────────────────────────────────────
 
-export function useSaleList() {
-  return useQuery({ queryKey: ["pos", "sales"], queryFn: listSales });
+export function useSaleList(filters: SaleListFilters = {}) {
+  return useQuery({ queryKey: ["pos", "sales", "list", filters], queryFn: () => listSales(filters) });
 }
 
 export function useSaleDetail(id: string | undefined) {
@@ -98,10 +98,10 @@ export function useSaleDetail(id: string | undefined) {
   });
 }
 
-export function useTodaySalesSummary() {
+export function useTodaySalesSummary(period: SalePeriod = "today") {
   return useQuery({
-    queryKey: ["pos", "sales", "today-summary"],
-    queryFn: getTodaySalesSummary,
+    queryKey: ["pos", "sales", "summary", period],
+    queryFn: () => getTodaySalesSummary(period),
     staleTime: 15_000,
   });
 }

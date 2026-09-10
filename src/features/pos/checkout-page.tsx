@@ -8,6 +8,7 @@ import { BarcodeScanner } from "@/components/pos/barcode-scanner";
 import { ProductSearch } from "@/features/pos/product-search";
 import { QuickAddProductDialog } from "@/features/pos/quick-add-dialog";
 import { CustomItemDialog } from "@/features/pos/custom-item-dialog";
+import { PosTabs } from "@/features/pos/pos-tabs";
 import { useCreateSale, useTodaySalesSummary } from "@/hooks/use-pos";
 import { findProductByBarcode } from "@/api/endpoints/pos";
 import { formatMoney } from "@/lib/format";
@@ -115,6 +116,7 @@ export function CheckoutPage() {
   if (receipt) {
     return (
       <div className="mx-auto max-w-md space-y-4">
+        <PosTabs />
         <Card>
           <CardHeader>
             <CardTitle>Sale complete</CardTitle>
@@ -148,6 +150,7 @@ export function CheckoutPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
+      <PosTabs />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">Checkout</h2>

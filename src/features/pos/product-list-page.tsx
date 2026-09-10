@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { ProductForm } from "@/features/pos/product-form";
 import { ProductImportDialog } from "@/features/pos/product-import-dialog";
 import { CategoryManagerDialog } from "@/features/pos/category-manager-dialog";
+import { PosTabs } from "@/features/pos/pos-tabs";
 import type { ProductListEntry } from "@/types/pos";
 
 export function ProductListPage() {
@@ -41,6 +42,7 @@ export function ProductListPage() {
 
   return (
     <div className="space-y-6">
+      <PosTabs />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold text-[var(--color-ink)]">Products</h2>
