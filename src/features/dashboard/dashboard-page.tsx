@@ -10,12 +10,14 @@ import { EmptyState } from "@/components/ui/state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoiceAnalytics, useInvoiceList } from "@/hooks/use-invoices";
 import { useVirtualAccount } from "@/hooks/use-virtual-account";
+import { usePermission } from "@/hooks/use-team";
 import { formatDate, formatMoney } from "@/lib/format";
 
 export function DashboardPage() {
   const { data: analytics, isLoading: analyticsLoading } = useInvoiceAnalytics();
   const { data: recent, isLoading: recentLoading } = useInvoiceList({});
-  const { virtualAccount, isLoading: vaLoading } = useVirtualAccount();
+  const { virtualAccount, isLoading: vaLoading, isError: vaError } = useVirtualAccount();
+  const canManageSettlement = usePermission("business.settings.manage");
 
   const recentInvoices = recent?.results?.slice(0, 5) ?? [];
 
@@ -42,34 +44,44 @@ export function DashboardPage() {
         <StatCard label="Overdue" value={analytics ? String(analytics.overdue_invoices) : "—"} icon={AlertTriangle} isLoading={analyticsLoading} />
       </div>
 
-      {/* Virtual account banner */}
-      <Card className="border-l-4" style={{ borderLeftColor: "var(--color-primary)" }}>
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-soft)]">
-              <Building2 className="size-4 text-[var(--color-primary)]" />
+      {/* Virtual account banner — hidden entirely if the viewer lacks
+          business.settings.view (the API 403s rather than saying "not
+          configured", and those aren't the same thing to show) */}
+      {!vaError && (
+        <Card className="border-l-4" style={{ borderLeftColor: "var(--color-primary)" }}>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-soft)]">
+                <Building2 className="size-4 text-[var(--color-primary)]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[var(--color-ink)]">Virtual Account</p>
+                {vaLoading ? (
+                  <Skeleton className="mt-1 h-4 w-36" />
+                ) : virtualAccount ? (
+                  <p className="truncate font-ledger text-sm text-[var(--color-body)]">
+                    {virtualAccount.dedicated_account_number} · {virtualAccount.bank_name}
+                  </p>
+                ) : canManageSettlement ? (
+                  <p className="text-sm text-[var(--color-muted)]">Get a dedicated account number</p>
+                ) : (
+                  <p className="text-sm text-[var(--color-muted)]">Not yet set up by the business owner</p>
+                )}
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--color-ink)]">Virtual Account</p>
-              {vaLoading ? (
-                <Skeleton className="mt-1 h-4 w-36" />
-              ) : virtualAccount ? (
-                <p className="truncate font-ledger text-sm text-[var(--color-body)]">
-                  {virtualAccount.dedicated_account_number} · {virtualAccount.bank_name}
-                </p>
-              ) : (
-                <p className="text-sm text-[var(--color-muted)]">Get a dedicated account number</p>
-              )}
-            </div>
-          </div>
-          <Button size="sm" variant={virtualAccount ? "secondary" : "primary" as "secondary"} asChild>
-            <Link to="/virtual-account">
-              {virtualAccount ? "View account" : "Set up now"}
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
+            {/* Only the owner/admin can act on this — everyone else with
+                view access just sees the details once configured. */}
+            {(virtualAccount || canManageSettlement) && (
+              <Button size="sm" variant={virtualAccount ? "secondary" : "primary" as "secondary"} asChild>
+                <Link to="/virtual-account">
+                  {virtualAccount ? "View account" : "Set up now"}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Revenue chart */}
       <Card>
